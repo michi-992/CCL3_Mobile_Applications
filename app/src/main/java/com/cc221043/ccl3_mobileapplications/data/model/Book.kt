@@ -12,6 +12,6 @@ data class Book(
     val genre: List<String> = emptyList(),
     val platformat: String,
     val synopsis: String,
-    val rating: Int,
+    val rating: Int?,
     @PrimaryKey(autoGenerate = true) val id: Int = 0
 )

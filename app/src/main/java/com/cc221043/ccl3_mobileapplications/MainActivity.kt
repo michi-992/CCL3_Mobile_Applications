@@ -1,4 +1,4 @@
-package com.cc221043.ccl3_mobileapplications.ui
+package com.cc221043.ccl3_mobileapplications
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

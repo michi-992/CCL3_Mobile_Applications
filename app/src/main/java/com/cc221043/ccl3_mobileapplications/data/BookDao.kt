@@ -20,5 +20,5 @@ interface BookDao {
     suspend fun updateBook(partner: Book)
 
     @Query("SELECT * FROM books")
-    fun getBook(): Flow<List<Book>>
+    fun getAllBooks(): Flow<List<Book>>
 }

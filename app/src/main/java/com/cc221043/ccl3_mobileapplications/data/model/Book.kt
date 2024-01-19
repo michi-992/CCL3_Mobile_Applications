@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 data class Book(
     val title: String,
     val author: String = "",
-    val cover: String = "",
+    var cover: String = "",
     val status: String,
     val genre: List<String> = emptyList(),
     val platformat: String,

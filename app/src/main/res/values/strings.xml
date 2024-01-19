@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">BiblioBat</string>
+    <string-array name="genres">
+        <item>Fantasy</item>
+        <item>Sci-Fi</item>
+        <item>Dystopian</item>
+        <item>Adventure</item>
+        <item>Mystery/Thriller</item>
+        <item>Horror</item>
+        <item>Romance</item>
+        <item>Graphic Novel</item>
+        <item>Non-Fiction</item>
+        <item>Other</item>
+    </string-array>
 </resources>

@@ -10,13 +10,54 @@ import com.cc221043.ccl3_mobileapplications.R
 
 // Set of Material typography styles to start with
 val Typography = Typography(
-    bodyLarge = TextStyle(
+    titleLarge = TextStyle(
         fontFamily = FontFamily(Font(R.font.hennypenny)),
         fontWeight = FontWeight.Normal,
+        fontSize = 64.sp,
+        lineHeight = 114.sp,
+        letterSpacing = 0.5.sp
+    ),
+    titleMedium = TextStyle (
+        fontFamily = FontFamily(Font(R.font.hennypenny)),
+        fontWeight = FontWeight.Normal,
+        fontSize = 32.sp,
+        lineHeight = 56.sp,
+        letterSpacing = 0.5.sp,
+        color = Colors.OffWhite
+    ),
+    titleSmall = TextStyle (
+        fontFamily = FontFamily(Font(R.font.inter)),
+        fontWeight = FontWeight.Normal,
+        fontSize = 24.sp,
+        lineHeight = 29.sp,
+        letterSpacing = 0.5.sp,
+        color = Colors.OffWhite
+    ),
+    displayMedium = TextStyle (
+        fontFamily = FontFamily(Font(R.font.copse)),
+        fontWeight = FontWeight.Normal,
+        fontSize = 22.sp,
+        lineHeight = 28.sp,
+        letterSpacing = 0.5.sp
+    ),
+    bodySmall = TextStyle (
+        fontFamily = FontFamily(Font(R.font.inter)),
+        fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
-        lineHeight = 24.sp,
+        lineHeight = 20.sp,
+        letterSpacing = 0.5.sp
+    ),
+    bodyMedium = TextStyle (
+        fontFamily = FontFamily(Font(R.font.inter)),
+        fontWeight = FontWeight.Normal,
+        fontSize = 18.sp,
+        lineHeight = 22.sp,
         letterSpacing = 0.5.sp
     )
+
+
+
+
     /* Other default text styles to override
     titleLarge = TextStyle(
         fontFamily = FontFamily.Default,

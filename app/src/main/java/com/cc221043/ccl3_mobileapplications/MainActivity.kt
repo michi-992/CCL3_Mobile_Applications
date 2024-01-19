@@ -23,7 +23,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
 import com.cc221043.ccl3_mobileapplications.data.BookDatabase
 import com.cc221043.ccl3_mobileapplications.ui.theme.CCL3MobileApplicationsTheme
-import com.cc221043.ccl3_mobileapplications.ui.view.BoomBitch
 import com.cc221043.ccl3_mobileapplications.ui.view.MainView
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
 

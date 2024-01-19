@@ -1,8 +1,10 @@
 package com.cc221043.ccl3_mobileapplications.ui.view
 
+import android.media.Image
 import android.net.Uri
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,6 +26,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -65,7 +71,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import com.cc221043.ccl3_mobileapplications.R
+import com.cc221043.ccl3_mobileapplications.data.model.Book
 import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
 
@@ -274,25 +282,29 @@ fun HomeScreenAll(mainViewModel: MainViewModel, navController: NavController) {
 //    ) {
     LazyVerticalGrid(
         modifier = Modifier
-            .padding(vertical = 14.dp, horizontal = 14.dp)
-            .fillMaxHeight()
-            .fillMaxWidth()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = gradientColors
+                    colors = gradientColors,
                 )
-            ),
+            )
+            .padding(vertical = 14.dp, horizontal = 14.dp)
+            .fillMaxHeight()
+            .fillMaxWidth(),
+
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         columns = GridCells.Fixed(3),
         content = {
-            items(15) {
+            items(books.size) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(3.0f)
                         .height(154.dp)
-                        .background(Colors.OffWhite)
-                )
+                ) {
+                    AsyncImage(
+                        model = books[it].cover,
+                        contentDescription = null)
+                }
             }
         })
 //    }
@@ -312,6 +324,15 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
         var platformat by rememberSaveable { mutableStateOf("") }
         var synopsis by rememberSaveable { mutableStateOf("") }
         var status by rememberSaveable { mutableStateOf("") }
+
+        val iconButtonColors = rememberUpdatedState(
+            IconButtonDefaults.iconButtonColors(
+                contentColor = Colors.OffWhite,
+                containerColor = Colors.Blue0,
+                disabledContentColor = Colors.OffWhite,
+                disabledContainerColor = Colors.Blue0,
+            )
+        )
 
         Column {
             if (state.value.selectedImageURI == Uri.parse("")) {
@@ -360,11 +381,36 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                 onValueChange = { newText -> synopsis = newText },
                 label = { Text(text = "Synopsis") })
 
-            IconButton(onClick = {
+            Row (
+                Modifier.horizontalScroll(rememberScrollState())
+            ){
+                Button(
+                    onClick = { status = "Not started" }
+                ) {
+                    Row{
+                        Icon(imageVector = Icons.Default.Clear, contentDescription = null)
+                        Text(text = "Not started")
+                    }
+                }
+                Button(onClick = {
+                    status = "In Progress"
+                }) {
+                    Row {
+                        Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)
+                        Text(text = "In Progress")
+                    }
 
-            }) {
-
+                }
+                Button(onClick = {
+                    status = "Finished"
+                }) {
+                    Row {
+                        Icon(imageVector = Icons.Default.Check, contentDescription = null)
+                        Text(text = "Finished")
+                    }
+                }
             }
+
 
             Button(onClick = {
                 println(title)
@@ -372,6 +418,10 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                 println(state.value.selectedImageURI)
                 println(platformat)
                 println(synopsis)
+                println(status)
+
+                mainViewModel.saveBookAndImage(
+                    Book(title = title, author = author, platformat = platformat, rating = 2, synopsis = synopsis, status = status))
             }) {
                 Text(text = "Save book")
             }

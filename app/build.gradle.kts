@@ -82,4 +82,7 @@ dependencies {
 
     // navigation
     implementation("androidx.navigation:navigation-compose:2.7.4")
+
+    // pictures
+    implementation("io.coil-kt:coil-compose:2.5.0")
 }

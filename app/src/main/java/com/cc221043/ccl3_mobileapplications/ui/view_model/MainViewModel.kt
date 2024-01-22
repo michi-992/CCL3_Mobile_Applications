@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.File
 
 class MainViewModel (private val dao: BookDao, private val mainActivity: MainActivity) : ViewModel() {
@@ -30,8 +31,10 @@ class MainViewModel (private val dao: BookDao, private val mainActivity: MainAct
         }
     }
 
-    fun saveBookAndImage(book: Book) {
-        if(_mainViewState.value.selectedImageURI != Uri.parse("")) {
+    fun saveBookAndImage(book: Book): Long {
+        var insertedId: Long = -1
+
+        if (_mainViewState.value.selectedImageURI != Uri.parse("")) {
             val contentResolver = mainActivity.contentResolver
             val inputStream = contentResolver.openInputStream(_mainViewState.value.selectedImageURI)
 
@@ -47,14 +50,23 @@ class MainViewModel (private val dao: BookDao, private val mainActivity: MainAct
             book.cover = imagePath
         }
 
-        viewModelScope.launch {
-            dao.insertBook(book)
+        runBlocking {
+            insertedId = dao.insertBook(book)
+            println("Saved book ID: $insertedId")
+            updateImageURI(Uri.parse(""))
         }
 
-        updateImageURI(Uri.parse(""))
+        return insertedId
     }
 
     fun updateImageURI(imageURI: Uri) {
         _mainViewState.update { it.copy(selectedImageURI = imageURI) }
+    }
+
+    fun selectBookDetails(id: Int) {
+        viewModelScope.launch {
+            val book = dao.getBookById(id)
+            _mainViewState.update { it.copy(selectedBook = book) }
+        }
     }
 }

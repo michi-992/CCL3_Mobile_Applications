@@ -1,14 +1,13 @@
 package com.cc221043.ccl3_mobileapplications.ui.view
 
-import android.media.Image
 import android.net.Uri
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -35,36 +34,25 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallTopAppBar
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.UiComposable
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -82,7 +70,7 @@ sealed class Screen(val route: String) {
     object HomeAll : Screen("HomeAll")
     object HomeCategories : Screen("HomeCategories")
     object AddBook : Screen("AddBook")
-    object EditBook : Screen("AddBook")
+    object EditBook : Screen("EditBook")
     object BookDetails : Screen("BookDetails")
 }
 
@@ -156,6 +144,7 @@ fun MainView(
                 }
 
                 is Screen.BookDetails -> {
+
                 }
             }
         },
@@ -201,6 +190,13 @@ fun MainView(
                     navController,
                     onPickImage = { pickImageLauncher.launch("image/*") })
             }
+            composable("${Screen.BookDetails.route}/{bookId}") { backStackEntry ->
+                val arguments = requireNotNull(backStackEntry.arguments)
+                val bookId = arguments.getString("bookId")!!.toInt()
+
+                mainViewModel.selectBookDetails(bookId)
+                BookDetails(mainViewModel, navController, bookId)
+            }
         }
     }
 }
@@ -243,11 +239,11 @@ fun HomeAllTopBar() {
             Row {
                 Icon(
                     painter = painterResource(id = R.drawable.hanging_bat),
-                    contentDescription = null, // Content description for accessibility
+                    contentDescription = null,
                     modifier = Modifier
                         .height(46.dp)
                         .width(42.dp),
-                    tint = Colors.Blue6// Adjust the size as needed
+                    tint = Colors.Blue6
                 )
                 Spacer(modifier = Modifier.size(6.dp))
                 Text(
@@ -300,6 +296,9 @@ fun HomeScreenAll(mainViewModel: MainViewModel, navController: NavController) {
                     modifier = Modifier
                         .fillMaxWidth(3.0f)
                         .height(154.dp)
+                        .clickable {
+                            navController.navigate("${Screen.BookDetails.route}/${books[it].id}")
+                        }
                 ) {
                     AsyncImage(
                         model = books[it].cover,
@@ -312,7 +311,6 @@ fun HomeScreenAll(mainViewModel: MainViewModel, navController: NavController) {
 
 
 @OptIn(ExperimentalMaterial3Api::class)
-
 @Composable
 fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickImage: () -> Unit) {
     val state = mainViewModel.mainViewState.collectAsState()
@@ -413,18 +411,72 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
 
 
             Button(onClick = {
-                println(title)
-                println(author)
-                println(state.value.selectedImageURI)
-                println(platformat)
-                println(synopsis)
-                println(status)
+                val newBook = Book(
+                    title = title,
+                    author = author,
+                    platformat = platformat,
+                    rating = 3,
+                    synopsis = synopsis,
+                    status = status
+                )
 
-                mainViewModel.saveBookAndImage(
-                    Book(title = title, author = author, platformat = platformat, rating = 2, synopsis = synopsis, status = status))
+                val insertedId = mainViewModel.saveBookAndImage(newBook)
+                navController.navigate("${Screen.BookDetails.route}/$insertedId")
             }) {
                 Text(text = "Save book")
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BookDetails(mainViewModel: MainViewModel, navController: NavController, bookId: Int) {
+    val state = mainViewModel.mainViewState.collectAsState()
+    val book = state.value.selectedBook ?: return
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        AsyncImage(
+            model = book.cover,
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .clip(shape = RoundedCornerShape(8.dp))
+                .background(Color.Gray)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(text = "Title: ${book.title}", style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = "Author: ${book.author}", style = MaterialTheme.typography.displayMedium)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = "Platform/Format: ${book.platformat}", style = MaterialTheme.typography.displayMedium)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = "Synopsis: ${book.synopsis}", style = MaterialTheme.typography.displayMedium)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = "Status: ${book.status}", style = MaterialTheme.typography.displayMedium)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                if (bookId != null) {
+                    navController.navigate(Screen.HomeAll.route)
+                    mainViewModel.selectBookDetails(bookId)
+                } else {
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+        ) {
+            Text(text = "Back to Home")
         }
     }
 }

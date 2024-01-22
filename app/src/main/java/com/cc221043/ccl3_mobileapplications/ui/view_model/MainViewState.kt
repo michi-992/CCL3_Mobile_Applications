@@ -7,5 +7,6 @@ import com.cc221043.ccl3_mobileapplications.ui.view.Screen
 data class MainViewState (
     val selectedScreen: Screen = Screen.HomeAll,
     val books: List<Book> = emptyList(),
-    val selectedImageURI: Uri = Uri.parse("")
+    val selectedImageURI: Uri = Uri.parse(""),
+    val selectedBook: Book? = null
 )

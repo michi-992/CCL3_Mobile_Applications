@@ -47,6 +47,14 @@ class MainViewModel (private val dao: BookDao, private val mainActivity: MainAct
         }
     }
 
+    fun getBooksByQuery(searchText: String) {
+        viewModelScope.launch {
+            dao.getBooksBySearch(searchText).collect() {books ->
+                _mainViewState.update { it.copy(books = books) }
+            }
+        }
+    }
+
     fun saveBookAndImage(book: Book): Long {
         var insertedId: Long = -1
 

@@ -24,4 +24,7 @@ interface BookDao {
 
     @Query("SELECT * FROM books WHERE id = :id")
     suspend fun getBookById(id: Int): Book?
+
+    @Query("SELECT * FROM books WHERE LOWER(title) LIKE LOWER('%' || :searchText || '%')")
+    fun getBooksBySearch(searchText: String): Flow<List<Book>>
 }

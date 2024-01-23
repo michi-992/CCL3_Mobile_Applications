@@ -308,6 +308,7 @@ fun HomeAllTopBar(mainViewModel: MainViewModel, onSearch: (String) -> Unit) {
                     onSearch = {
 //                        onSearch.invoke(searchText)
                         mainViewModel.updateSearchText(searchText)
+                        mainViewModel.getBooksByQuery(searchText)
                         print("Search in HomeAllTopBar: ")
                         println(mainViewModel.mainViewState.value.searchText)
 

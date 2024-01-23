@@ -27,13 +27,6 @@ class MainViewModel (private val dao: BookDao, private val mainActivity: MainAct
     private val _mainViewState = MutableStateFlow(MainViewState())
     val mainViewState: StateFlow<MainViewState> = _mainViewState.asStateFlow()
 
-//    private val _searchText = MutableStateFlow("")
-//    val searchText: StateFlow<String> = _searchText.asStateFlow()
-
-    fun updateSearchText(text: String) {
-//        _searchText.value = text
-        _mainViewState.update { it.copy(searchText = text) }
-    }
 
     fun selectedScreen(screen: Screen) {
         _mainViewState.update { it.copy(selectedScreen = screen) }

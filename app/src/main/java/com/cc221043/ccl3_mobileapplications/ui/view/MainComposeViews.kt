@@ -106,8 +106,7 @@ fun MainView(
         topBar = {
             when (state.value.selectedScreen) {
                 is Screen.HomeAll -> {
-                    HomeAllTopBar(mainViewModel) {newSearchQuery ->
-                        mainViewModel.updateSearchText(newSearchQuery)
+                    HomeAllTopBar(mainViewModel) {
                     }
 //                    var tabIndex by remember {
 //                        mutableIntStateOf(0)
@@ -291,7 +290,7 @@ fun HomeAllTopBar(mainViewModel: MainViewModel, onSearch: (String) -> Unit) {
                         IconButton(
                             onClick = {
                                 searchText = ""
-                                mainViewModel.updateSearchText("")
+                                mainViewModel.getAllBooks()
                             }
                         ) {
                             Icon(
@@ -306,12 +305,7 @@ fun HomeAllTopBar(mainViewModel: MainViewModel, onSearch: (String) -> Unit) {
                 ),
                 keyboardActions = KeyboardActions(
                     onSearch = {
-//                        onSearch.invoke(searchText)
-                        mainViewModel.updateSearchText(searchText)
                         mainViewModel.getBooksByQuery(searchText)
-                        print("Search in HomeAllTopBar: ")
-                        println(mainViewModel.mainViewState.value.searchText)
-
                     }
                 )
             )
@@ -328,16 +322,6 @@ fun HomeScreenAll(mainViewModel: MainViewModel, navController: NavController) {
     val books = state.value.books
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
 
-//    val searchText by mainViewModel.searchText.collectAsState()
-
-    val filteredBooks = if (state.value.searchText.isNotEmpty()) {
-        print("Search in HomeScreenAll: ")
-        println(state.value.searchText)
-
-        books.filter { it.title.contains(state.value.searchText, ignoreCase = true)}
-    } else {
-        books
-    }
 //    Box(
 //        Modifier
 //            .fillMaxHeight(9.0f)
@@ -366,7 +350,7 @@ fun HomeScreenAll(mainViewModel: MainViewModel, navController: NavController) {
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         columns = GridCells.Fixed(3),
         content = {
-            items(filteredBooks.size) {
+            items(books.size) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(3.0f)
@@ -446,7 +430,7 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                     .padding(vertical = 20.dp),
                 value = platformat,
                 onValueChange = { newText -> platformat = newText },
-                label = { Text(text = "Author") })
+                label = { Text(text = "Platform/Format") })
 
             TextField(
                 modifier = Modifier

@@ -8,6 +8,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -25,12 +26,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,6 +49,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -196,6 +202,13 @@ fun MainView(
 
                 mainViewModel.selectBookDetails(bookId)
                 BookDetails(mainViewModel, navController, bookId)
+            }
+            composable(Screen.EditBook.route + "/{bookId}") { backStackEntry ->
+                val arguments = requireNotNull(backStackEntry.arguments)
+                val bookId = arguments.getString("bookId")!!.toInt()
+
+                mainViewModel.selectBookDetails(bookId)
+                EditBook(mainViewModel, navController, bookId, onPickImage = { pickImageLauncher.launch("image/*") })
             }
         }
     }
@@ -435,6 +448,18 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
     val state = mainViewModel.mainViewState.collectAsState()
     val book = state.value.selectedBook ?: return
 
+    var isMenuExpanded by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    val iconButtonColors = rememberUpdatedState(
+        IconButtonDefaults.iconButtonColors(
+            contentColor = Colors.OffWhite,
+            containerColor = Colors.Blue0,
+            disabledContentColor = Colors.OffWhite,
+            disabledContainerColor = Colors.Blue0,
+        )
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -452,7 +477,7 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "Title: ${book.title}", style = MaterialTheme.typography.titleMedium)
+        Text(text = "Title: ${book.title}", style = MaterialTheme.typography.displayMedium)
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = "Author: ${book.author}", style = MaterialTheme.typography.displayMedium)
         Spacer(modifier = Modifier.height(8.dp))
@@ -477,6 +502,204 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
                 .height(48.dp)
         ) {
             Text(text = "Back to Home")
+        }
+
+        IconButton(
+            onClick = { isMenuExpanded = !isMenuExpanded },
+        ) {
+            Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
+        }
+
+        DropdownMenu(
+            expanded = isMenuExpanded,
+            onDismissRequest = { isMenuExpanded = false },
+            modifier = Modifier
+                .width(IntrinsicSize.Max)
+        ) {
+            DropdownMenuItem(
+                onClick = {
+                    isMenuExpanded = false
+                    navController.navigate("${Screen.EditBook.route}/$bookId")
+                },
+                text = { Text("Edit") },
+                enabled = true
+            )
+
+            DropdownMenuItem(
+                onClick = {
+                    isMenuExpanded = false
+                    showDeleteDialog = true
+                },
+                text = { Text("Delete") },
+                enabled = true
+            )
+        }
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Book") },
+            text = { Text("Are you sure you want to delete this book?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeleteDialog = false
+                        mainViewModel.deleteBook(book)
+                        navController.navigate(Screen.HomeAll.route)
+                    }
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditBook(
+    mainViewModel: MainViewModel,
+    navController: NavController,
+    bookId: Int,
+    onPickImage: () -> Unit
+) {
+    val state = mainViewModel.mainViewState.collectAsState()
+    val book = state.value.selectedBook ?: return
+
+    Column(
+        Modifier.verticalScroll(rememberScrollState())
+    ) {
+        var title by rememberSaveable { mutableStateOf(book.title) }
+        var author by rememberSaveable { mutableStateOf(book.author) }
+        var platformat by rememberSaveable { mutableStateOf(book.platformat) }
+        var synopsis by rememberSaveable { mutableStateOf(book.synopsis) }
+        var status by rememberSaveable { mutableStateOf(book.status) }
+
+        val iconButtonColors = rememberUpdatedState(
+            IconButtonDefaults.iconButtonColors(
+                contentColor = Colors.OffWhite,
+                containerColor = Colors.Blue0,
+                disabledContentColor = Colors.OffWhite,
+                disabledContainerColor = Colors.Blue0,
+            )
+        )
+
+        Column {
+            AsyncImage(
+                model = book.cover,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(shape = RoundedCornerShape(8.dp))
+                    .background(Color.Gray)
+            )
+
+            if (state.value.selectedImageURI == Uri.parse("")) {
+                Button(
+                    onClick = {
+                        onPickImage()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AddCircle,
+                        contentDescription = null
+                    )
+                }
+            }
+
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 20.dp),
+                value = title,
+                onValueChange = { newText -> title = newText },
+                label = { Text(text = "Title") }
+            )
+
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 20.dp),
+                value = author,
+                onValueChange = { newText -> author = newText },
+                label = { Text(text = "Author") }
+            )
+
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 20.dp),
+                value = platformat,
+                onValueChange = { newText -> platformat = newText },
+                label = { Text(text = "Platform/Format") }
+            )
+
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 20.dp),
+                value = synopsis,
+                onValueChange = { newText -> synopsis = newText },
+                label = { Text(text = "Synopsis") }
+            )
+
+            Row (
+                Modifier.horizontalScroll(rememberScrollState())
+            ){
+                Button(
+                    onClick = { status = "Not started" }
+                ) {
+                    Row{
+                        Icon(imageVector = Icons.Default.Clear, contentDescription = null)
+                        Text(text = "Not started")
+                    }
+                }
+                Button(onClick = {
+                    status = "In Progress"
+                }) {
+                    Row {
+                        Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)
+                        Text(text = "In Progress")
+                    }
+
+                }
+                Button(onClick = {
+                    status = "Finished"
+                }) {
+                    Row {
+                        Icon(imageVector = Icons.Default.Check, contentDescription = null)
+                        Text(text = "Finished")
+                    }
+                }
+            }
+
+            Button(
+                onClick = {
+                    val editedBook = Book(
+                        id = book.id,
+                        title = title,
+                        author = author,
+                        platformat = platformat,
+                        rating = 3,
+                        synopsis = synopsis,
+                        status = status
+                    )
+
+                    mainViewModel.updateBookAndImage(editedBook)
+
+                    navController.navigate("${Screen.BookDetails.route}/${editedBook.id}")
+                }
+            ) {
+                Text(text = "Save Changes")
+            }
         }
     }
 }

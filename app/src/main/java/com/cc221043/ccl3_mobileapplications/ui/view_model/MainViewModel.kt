@@ -57,16 +57,53 @@ class MainViewModel (private val dao: BookDao, private val mainActivity: MainAct
         }
 
         return insertedId
+
+        clearSelectedImageURI()
     }
 
     fun updateImageURI(imageURI: Uri) {
         _mainViewState.update { it.copy(selectedImageURI = imageURI) }
     }
 
+    fun clearSelectedImageURI() {
+        _mainViewState.update { it.copy(selectedImageURI = Uri.parse("")) }
+    }
+
     fun selectBookDetails(id: Int) {
         viewModelScope.launch {
             val book = dao.getBookById(id)
             _mainViewState.update { it.copy(selectedBook = book) }
+        }
+    }
+
+    fun updateBookAndImage(editedBook: Book) {
+        viewModelScope.launch {
+            if (_mainViewState.value.selectedImageURI != Uri.parse("")) {
+                val contentResolver = mainActivity.contentResolver
+                val inputStream = contentResolver.openInputStream(_mainViewState.value.selectedImageURI)
+
+                val fileName = "image_${System.currentTimeMillis()}.jpg"
+                val file = File(mainActivity.filesDir, fileName)
+
+                inputStream?.use { input ->
+                    file.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                val imagePath = file.absolutePath
+                editedBook.cover = imagePath
+
+                clearSelectedImageURI()
+            }
+
+            dao.updateBook(editedBook)
+            updateImageURI(Uri.parse(""))
+        }
+    }
+
+    fun deleteBook(book: Book) {
+        viewModelScope.launch {
+            dao.deleteBook(book)
         }
     }
 }

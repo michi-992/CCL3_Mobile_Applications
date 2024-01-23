@@ -18,10 +18,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
@@ -30,6 +33,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -60,6 +64,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -70,6 +75,7 @@ import com.cc221043.ccl3_mobileapplications.R
 import com.cc221043.ccl3_mobileapplications.data.model.Book
 import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
+import com.google.android.material.search.SearchBar
 
 
 sealed class Screen(val route: String) {
@@ -100,7 +106,9 @@ fun MainView(
         topBar = {
             when (state.value.selectedScreen) {
                 is Screen.HomeAll -> {
-                    HomeAllTopBar()
+                    HomeAllTopBar(mainViewModel) {newSearchQuery ->
+                        mainViewModel.updateSearchText(newSearchQuery)
+                    }
 //                    var tabIndex by remember {
 //                        mutableIntStateOf(0)
 //                    }
@@ -246,7 +254,9 @@ fun AddBookTopBar(navController: NavController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeAllTopBar() {
+fun HomeAllTopBar(mainViewModel: MainViewModel, onSearch: (String) -> Unit) {
+    var searchText by rememberSaveable { mutableStateOf("") }
+    
     CenterAlignedTopAppBar(
         title = {
             Row {
@@ -265,7 +275,47 @@ fun HomeAllTopBar() {
                 )
             }
 
+        }, actions = {
+            TextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = searchText,
+                onValueChange = {
+                    searchText = it
+                },
+                placeholder = { Text("Search") },
+                leadingIcon = {
+                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                },
+                trailingIcon = {
+                    if (searchText.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                searchText = ""
+                                mainViewModel.updateSearchText("")
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = null
+                            )
+                        }
+                    }
+                },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Search
+                ),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+//                        onSearch.invoke(searchText)
+                        mainViewModel.updateSearchText(searchText)
+                        print("Search in HomeAllTopBar: ")
+                        println(mainViewModel.mainViewState.value.searchText)
+
+                    }
+                )
+            )
         },
+
         scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     )
 }
@@ -277,6 +327,16 @@ fun HomeScreenAll(mainViewModel: MainViewModel, navController: NavController) {
     val books = state.value.books
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
 
+//    val searchText by mainViewModel.searchText.collectAsState()
+
+    val filteredBooks = if (state.value.searchText.isNotEmpty()) {
+        print("Search in HomeScreenAll: ")
+        println(state.value.searchText)
+
+        books.filter { it.title.contains(state.value.searchText, ignoreCase = true)}
+    } else {
+        books
+    }
 //    Box(
 //        Modifier
 //            .fillMaxHeight(9.0f)
@@ -289,6 +349,7 @@ fun HomeScreenAll(mainViewModel: MainViewModel, navController: NavController) {
 //            .verticalScroll(rememberScrollState())
 //
 //    ) {
+
     LazyVerticalGrid(
         modifier = Modifier
             .background(
@@ -304,7 +365,7 @@ fun HomeScreenAll(mainViewModel: MainViewModel, navController: NavController) {
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         columns = GridCells.Fixed(3),
         content = {
-            items(books.size) {
+            items(filteredBooks.size) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(3.0f)
@@ -320,8 +381,11 @@ fun HomeScreenAll(mainViewModel: MainViewModel, navController: NavController) {
             }
         })
 //    }
-}
 
+    //HomeAllTopBar { newSearchQuery ->
+    //    HomeScreenAll(mainViewModel, navController, newSearchQuery)
+    //}
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

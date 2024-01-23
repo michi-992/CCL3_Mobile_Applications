@@ -8,5 +8,6 @@ data class MainViewState (
     val selectedScreen: Screen = Screen.HomeAll,
     val books: List<Book> = emptyList(),
     val selectedImageURI: Uri = Uri.parse(""),
-    val selectedBook: Book? = null
+    val selectedBook: Book? = null,
+    val previousScreen: String = ""
 )

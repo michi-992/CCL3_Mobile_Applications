@@ -33,7 +33,10 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -52,6 +55,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -106,58 +110,21 @@ fun MainView(
         topBar = {
             when (state.value.selectedScreen) {
                 is Screen.HomeAll -> {
-                    HomeAllTopBar(mainViewModel) {
-                    }
-//                    var tabIndex by remember {
-//                        mutableIntStateOf(0)
-//                    }
-//                    val tabs = listOf("All Books", "Categories")
-//
-//                    TabRow(
-//                        selectedTabIndex = tabIndex,
-//                        divider = {
-//                            // Customize the divider appearance here
-//                            Spacer(
-//                                modifier = Modifier
-//                                    .height(2.dp)
-//                                    .fillMaxWidth() // Width of the divider
-//                                    .background(Colors.Blue4) // Color of the divider
-//                            )
-//                        }
-//                    ) {
-//                        tabs.forEachIndexed { index, title ->
-//                            Tab(text = { Text(title) },
-//                                selected = tabIndex == index,
-//                                onClick = { tabIndex = index }
-//                            )
-//                        }
-//                    }
-//// Use the updated tabIndex to determine the selected tab
-//                    when (tabIndex) {
-//                        0 -> {
-//                            println("Selected Tab: All Books")
-//                            // Handle the content for the "All Books" tab
-//                        }
-//
-//                        1 -> {
-//                            println("Selected Tab: Categories")
-//                            // Handle the content for the "Categories" tab
-//                        }
-//                    }
+                    HomeAllTopBar(mainViewModel)
                 }
-
+//
                 is Screen.HomeCategories -> {
                 }
 
                 is Screen.AddBook -> {
-                    AddBookTopBar(navController)
+                    AddBookTopBar(mainViewModel, navController)
                 }
 
                 is Screen.EditBook -> {
                 }
 
                 is Screen.BookDetails -> {
-
+                    AddBookTopBar(mainViewModel, navController)
                 }
             }
         },
@@ -182,6 +149,8 @@ fun MainView(
                         Text(text = "Add book")
                     }
                 }
+            } else {
+
             }
         }
     ) {
@@ -204,6 +173,7 @@ fun MainView(
                     onPickImage = { pickImageLauncher.launch("image/*") })
             }
             composable("${Screen.BookDetails.route}/{bookId}") { backStackEntry ->
+                mainViewModel.selectedScreen(Screen.BookDetails)
                 val arguments = requireNotNull(backStackEntry.arguments)
                 val bookId = arguments.getString("bookId")!!.toInt()
 
@@ -211,6 +181,8 @@ fun MainView(
                 BookDetails(mainViewModel, navController, bookId)
             }
             composable(Screen.EditBook.route + "/{bookId}") { backStackEntry ->
+                mainViewModel.selectedScreen(Screen.EditBook)
+
                 val arguments = requireNotNull(backStackEntry.arguments)
                 val bookId = arguments.getString("bookId")!!.toInt()
 
@@ -223,7 +195,8 @@ fun MainView(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddBookTopBar(navController: NavController) {
+fun AddBookTopBar(mainViewModel: MainViewModel, navController: NavController) {
+    val state = mainViewModel.mainViewState.collectAsState()
     val iconButtonColors = rememberUpdatedState(
         IconButtonDefaults.iconButtonColors(
             contentColor = Colors.OffWhite,
@@ -235,7 +208,14 @@ fun AddBookTopBar(navController: NavController) {
     CenterAlignedTopAppBar(
         navigationIcon = {
             IconButton(
-                onClick = { navController.navigateUp() },
+                onClick = {
+                    if(state.value.previousScreen == Screen.AddBook.route || state.value.previousScreen == Screen.EditBook.route) {
+                        navController.navigate("HomeAll")
+                        mainViewModel.previousScreen("")
+                    } else {
+                        navController.navigateUp()
+                    }
+                    },
                 colors = iconButtonColors.value
             ) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
@@ -253,7 +233,7 @@ fun AddBookTopBar(navController: NavController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeAllTopBar(mainViewModel: MainViewModel, onSearch: (String) -> Unit) {
+fun HomeAllTopBar(mainViewModel: MainViewModel) {
     var searchText by rememberSaveable { mutableStateOf("") }
     
     CenterAlignedTopAppBar(
@@ -274,42 +254,43 @@ fun HomeAllTopBar(mainViewModel: MainViewModel, onSearch: (String) -> Unit) {
                 )
             }
 
-        }, actions = {
-            TextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = searchText,
-                onValueChange = {
-                    searchText = it
-                },
-                placeholder = { Text("Search") },
-                leadingIcon = {
-                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
-                },
-                trailingIcon = {
-                    if (searchText.isNotEmpty()) {
-                        IconButton(
-                            onClick = {
-                                searchText = ""
-                                mainViewModel.getAllBooks()
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Clear,
-                                contentDescription = null
-                            )
-                        }
-                    }
-                },
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Search
-                ),
-                keyboardActions = KeyboardActions(
-                    onSearch = {
-                        mainViewModel.getBooksByQuery(searchText)
-                    }
-                )
-            )
         },
+//        , actions = {
+//            TextField(
+//                modifier = Modifier.fillMaxWidth(),
+//                value = searchText,
+//                onValueChange = {
+//                    searchText = it
+//                },
+//                placeholder = { Text("Search") },
+//                leadingIcon = {
+//                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
+//                },
+//                trailingIcon = {
+//                    if (searchText.isNotEmpty()) {
+//                        IconButton(
+//                            onClick = {
+//                                searchText = ""
+//                                mainViewModel.getAllBooks()
+//                            }
+//                        ) {
+//                            Icon(
+//                                imageVector = Icons.Default.Clear,
+//                                contentDescription = null
+//                            )
+//                        }
+//                    }
+//                },
+//                keyboardOptions = KeyboardOptions.Default.copy(
+//                    imeAction = ImeAction.Search
+//                ),
+//                keyboardActions = KeyboardActions(
+//                    onSearch = {
+//                        mainViewModel.getBooksByQuery(searchText)
+//                    }
+//                )
+//            )
+//        },
 
         scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     )
@@ -321,19 +302,6 @@ fun HomeScreenAll(mainViewModel: MainViewModel, navController: NavController) {
     val state = mainViewModel.mainViewState.collectAsState()
     val books = state.value.books
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
-
-//    Box(
-//        Modifier
-//            .fillMaxHeight(9.0f)
-//            .fillMaxWidth()
-//            .background(
-//                brush = Brush.verticalGradient(
-//                    colors = gradientColors
-//                )
-//            )
-//            .verticalScroll(rememberScrollState())
-//
-//    ) {
 
     LazyVerticalGrid(
         modifier = Modifier
@@ -384,6 +352,8 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
         var platformat by rememberSaveable { mutableStateOf("") }
         var synopsis by rememberSaveable { mutableStateOf("") }
         var status by rememberSaveable { mutableStateOf("") }
+        var rating by remember { mutableIntStateOf(0) }
+
 
         val iconButtonColors = rememberUpdatedState(
             IconButtonDefaults.iconButtonColors(
@@ -395,6 +365,14 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
         )
 
         Column {
+            if (state.value.selectedImageURI != null) {
+                AsyncImage(
+                    model = state.value.selectedImageURI,
+                    contentDescription = null,
+                    modifier = Modifier.width(80.dp)
+                )
+            }
+
             if (state.value.selectedImageURI == Uri.parse("")) {
                 Button(
                     onClick = {
@@ -445,7 +423,10 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                 Modifier.horizontalScroll(rememberScrollState())
             ){
                 Button(
-                    onClick = { status = "Not started" }
+                    onClick = {
+                        status = "Not started"
+                        rating = 0
+                    }
                 ) {
                     Row{
                         Icon(imageVector = Icons.Default.Clear, contentDescription = null)
@@ -454,6 +435,7 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                 }
                 Button(onClick = {
                     status = "In Progress"
+                    rating = 0
                 }) {
                     Row {
                         Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)
@@ -470,23 +452,57 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                     }
                 }
             }
+            if (status == "Finished") {
+                RatingBar(
+                    rating = rating, onRatingChanged = {
+                        rating = it
+                    }, modifier = Modifier.padding(16.dp)
+                )
+                Button(onClick = { rating = 0 }) {
+                    Text(text = "Clear")
+                }
+            }
 
-
+            
             Button(onClick = {
                 val newBook = Book(
                     title = title,
                     author = author,
                     platformat = platformat,
-                    rating = 3,
+                    rating = rating,
                     synopsis = synopsis,
                     status = status
                 )
 
+                mainViewModel.previousScreen(state.value.selectedScreen.route)
                 val insertedId = mainViewModel.saveBookAndImage(newBook)
                 navController.navigate("${Screen.BookDetails.route}/$insertedId")
             }) {
                 Text(text = "Save book")
             }
+        }
+    }
+}
+
+@Composable
+fun RatingBar(
+    rating: Int, onRatingChanged: (Int) -> Unit, modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        for (i in 1..5) {
+            val isSelected = i <= rating
+            Icon(imageVector = if(isSelected) Icons.Default.Star else Icons.Outlined.Star,
+                contentDescription = null,
+                tint = if (isSelected) Color.Yellow else Color.Gray,
+                modifier = Modifier
+                    .size(32.dp)
+                    .clickable {
+                        onRatingChanged(i)
+                    })
         }
     }
 }
@@ -535,6 +551,11 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
         Text(text = "Synopsis: ${book.synopsis}", style = MaterialTheme.typography.displayMedium)
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = "Status: ${book.status}", style = MaterialTheme.typography.displayMedium)
+        Spacer(modifier = Modifier.height(8.dp))
+        if (book.rating != 0 && book.status == "Finished") {
+            RatingBar(rating = book.rating, onRatingChanged = {})
+        }
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -629,6 +650,7 @@ fun EditBook(
         var platformat by rememberSaveable { mutableStateOf(book.platformat) }
         var synopsis by rememberSaveable { mutableStateOf(book.synopsis) }
         var status by rememberSaveable { mutableStateOf(book.status) }
+        var rating by remember { mutableIntStateOf(book.rating) }
 
         val iconButtonColors = rememberUpdatedState(
             IconButtonDefaults.iconButtonColors(
@@ -640,17 +662,16 @@ fun EditBook(
         )
 
         Column {
-            AsyncImage(
-                model = book.cover,
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(shape = RoundedCornerShape(8.dp))
-                    .background(Color.Gray)
-            )
-
-            if (state.value.selectedImageURI == Uri.parse("")) {
+            if(state.value.selectedImageURI == Uri.parse("")) {
+                AsyncImage(
+                    model = book.cover,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(shape = RoundedCornerShape(8.dp))
+                        .background(Color.Gray)
+                )
                 Button(
                     onClick = {
                         onPickImage()
@@ -658,7 +679,28 @@ fun EditBook(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(
-                        imageVector = Icons.Default.AddCircle,
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = null
+                    )
+                }
+            } else {
+                AsyncImage(
+                    model = state.value.selectedImageURI,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(shape = RoundedCornerShape(8.dp))
+                        .background(Color.Gray)
+                )
+                Button(
+                    onClick = {
+                        onPickImage()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
                         contentDescription = null
                     )
                 }
@@ -704,7 +746,10 @@ fun EditBook(
                 Modifier.horizontalScroll(rememberScrollState())
             ){
                 Button(
-                    onClick = { status = "Not started" }
+                    onClick = {
+                        status = "Not started"
+                        rating = 0
+                    }
                 ) {
                     Row{
                         Icon(imageVector = Icons.Default.Clear, contentDescription = null)
@@ -713,6 +758,7 @@ fun EditBook(
                 }
                 Button(onClick = {
                     status = "In Progress"
+                    rating = 0
                 }) {
                     Row {
                         Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)
@@ -729,6 +775,17 @@ fun EditBook(
                     }
                 }
             }
+            if(status == "Finished") {
+                RatingBar(
+                    rating = rating, onRatingChanged = {
+                        rating = it
+                    }, modifier = Modifier.padding(16.dp)
+                )
+                Button(onClick = { rating = 0 }) {
+                    Text(text = "Clear")
+                }
+            }
+
 
             Button(
                 onClick = {
@@ -737,13 +794,13 @@ fun EditBook(
                         title = title,
                         author = author,
                         platformat = platformat,
-                        rating = 3,
+                        rating = rating,
                         synopsis = synopsis,
-                        status = status
+                        status = status,
+                        cover = book.cover
                     )
-
+                    mainViewModel.previousScreen(state.value.selectedScreen.route)
                     mainViewModel.updateBookAndImage(editedBook)
-
                     navController.navigate("${Screen.BookDetails.route}/${editedBook.id}")
                 }
             ) {

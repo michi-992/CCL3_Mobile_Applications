@@ -53,6 +53,13 @@ val Typography = Typography(
         fontSize = 18.sp,
         lineHeight = 22.sp,
         letterSpacing = 0.5.sp
+    ),
+    displaySmall = TextStyle (
+        fontFamily = FontFamily(Font(R.font.inter)),
+        fontWeight = FontWeight.Normal,
+        fontSize = 20.sp,
+        lineHeight = 22.sp,
+        letterSpacing = 0.5.sp
     )
 
 

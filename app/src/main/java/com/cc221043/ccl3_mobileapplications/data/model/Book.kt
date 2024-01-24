@@ -11,7 +11,7 @@ data class Book(
     val author: String = "",
     var cover: String = "",
     val status: String,
-    val genre: List<String> = emptyList(),
+    val genres: List<String> = emptyList(),
     val platformat: String,
     val synopsis: String,
     val rating: Int = 0,

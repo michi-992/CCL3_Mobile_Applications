@@ -44,6 +44,14 @@ class MainViewModel (private val dao: BookDao, private val mainActivity: MainAct
         }
     }
 
+//    fun getBooksByGenre(selectedGenre: String) {
+//        viewModelScope.launch {
+//            dao.getBooksByGenre(selectedGenre).collect {books ->
+//                _mainViewState.update { it.copy(books = books) }
+//            }
+//        }
+//    }
+
     fun getBooksByQuery(searchText: String) {
         viewModelScope.launch {
             dao.getBooksBySearch(searchText).collect() {books ->

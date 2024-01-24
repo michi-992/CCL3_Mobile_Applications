@@ -56,6 +56,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
@@ -111,10 +113,11 @@ fun MainView(
         topBar = {
             when (state.value.selectedScreen) {
                 is Screen.HomeAll -> {
-                    HomeAllTopBar(mainViewModel)
+                    HomeTopBar(mainViewModel, navController)
                 }
 //
                 is Screen.HomeGenres -> {
+                    HomeTopBar(mainViewModel, navController)
                 }
 
                 is Screen.AddBook -> {
@@ -122,10 +125,11 @@ fun MainView(
                 }
 
                 is Screen.EditBook -> {
+                    EditBookTopBar(mainViewModel, navController)
                 }
 
                 is Screen.BookDetails -> {
-                    AddBookTopBar(mainViewModel, navController)
+                    BookDetailsTopBar(mainViewModel, navController)
                 }
             }
         }
@@ -139,6 +143,11 @@ fun MainView(
                 mainViewModel.selectedScreen(Screen.HomeAll)
                 mainViewModel.getAllBooks()
                 HomeScreenAll(mainViewModel, navController)
+            }
+            composable(Screen.HomeGenres.route) {
+                mainViewModel.selectedScreen(Screen.HomeGenres)
+                mainViewModel.getAllBooks()
+//                HomeScreenGenres(mainViewModel, navController)
             }
             composable(Screen.AddBook.route) {
                 mainViewModel.selectedScreen(Screen.AddBook)
@@ -158,7 +167,6 @@ fun MainView(
             }
             composable(Screen.EditBook.route + "/{bookId}") { backStackEntry ->
                 mainViewModel.selectedScreen(Screen.EditBook)
-
                 val arguments = requireNotNull(backStackEntry.arguments)
                 val bookId = arguments.getString("bookId")!!.toInt()
 
@@ -211,29 +219,105 @@ fun AddBookTopBar(mainViewModel: MainViewModel, navController: NavController) {
     )
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeAllTopBar(mainViewModel: MainViewModel) {
-    var searchText by rememberSaveable { mutableStateOf("") }
+fun EditBookTopBar(mainViewModel: MainViewModel, navController: NavController) {
+    val state = mainViewModel.mainViewState.collectAsState()
+    val iconButtonColors = rememberUpdatedState(
+        IconButtonDefaults.iconButtonColors(
+            contentColor = Colors.OffWhite,
+            containerColor = Colors.Blue0,
+            disabledContentColor = Colors.OffWhite,
+            disabledContainerColor = Colors.Blue0,
+        )
+    )
+    CenterAlignedTopAppBar(
+        navigationIcon = {
+            IconButton(
+                onClick = {
+                    if (state.value.previousScreen == Screen.AddBook.route || state.value.previousScreen == Screen.EditBook.route) {
+                        navController.navigate("HomeAll")
+                        mainViewModel.previousScreen("")
+                    } else {
+                        navController.navigateUp()
+                    }
+                },
+                colors = iconButtonColors.value
+            ) {
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+            }
+        },
+        title = {
+            Text(
+                text = "Add Book",
+                style = MaterialTheme.typography.titleSmall
+            )
+        },
+        scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    )
+}
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BookDetailsTopBar(mainViewModel: MainViewModel, navController: NavController) {
+    val state = mainViewModel.mainViewState.collectAsState()
+    val iconButtonColors = rememberUpdatedState(
+        IconButtonDefaults.iconButtonColors(
+            contentColor = Colors.OffWhite,
+            containerColor = Colors.Blue0,
+            disabledContentColor = Colors.OffWhite,
+            disabledContainerColor = Colors.Blue0,
+        )
+    )
+    CenterAlignedTopAppBar(
+        navigationIcon = {
+            IconButton(
+                onClick = {
+                    if (state.value.previousScreen == Screen.AddBook.route || state.value.previousScreen == Screen.EditBook.route) {
+                        navController.navigate("HomeAll")
+                        mainViewModel.previousScreen("")
+                    } else {
+                        navController.navigateUp()
+                    }
+                },
+                colors = iconButtonColors.value
+            ) {
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+            }
+        },
+        title = {
+            Text(
+                text = "Book Details",
+                style = MaterialTheme.typography.titleSmall
+            )
+        },
+        scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeTopBar(mainViewModel: MainViewModel, navController: NavController) {
     CenterAlignedTopAppBar(
         title = {
-            Row {
-                Icon(
-                    painter = painterResource(id = R.drawable.hanging_bat),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .height(46.dp)
-                        .width(42.dp),
-                    tint = Colors.Blue6
-                )
-                Spacer(modifier = Modifier.size(6.dp))
-                Text(
-                    text = stringResource(id = R.string.app_name),
-                    style = MaterialTheme.typography.titleMedium
-                )
+            Column {
+                Row {
+                    Icon(
+                        painter = painterResource(id = R.drawable.hanging_bat),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .height(46.dp)
+                            .width(42.dp),
+                        tint = Colors.Blue6
+                    )
+                    Spacer(modifier = Modifier.size(6.dp))
+                    Text(
+                        text = stringResource(id = R.string.app_name),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
             }
-
         },
         scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     )
@@ -267,6 +351,42 @@ fun HomeScreenAll(mainViewModel: MainViewModel, navController: NavController) {
                 .padding(start = 14.dp, end = 14.dp, top = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            var tabIndex by remember {
+                mutableIntStateOf(0)
+            }
+            val tabs = listOf("All Books", "Categories")
+
+            TabRow(
+                selectedTabIndex = tabIndex,
+                divider = {
+                    // Customize the divider appearance here
+                    Spacer(
+                        modifier = Modifier
+                            .height(2.dp)
+                            .fillMaxWidth() // Width of the divider
+                            .background(Colors.Blue4) // Color of the divider
+                    )
+                }
+            ) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(text = { Text(title) },
+                        selected = tabIndex == index,
+                        onClick = { tabIndex = index }
+                    )
+                }
+            }
+            when (tabIndex) {
+                0 -> {
+//                        navController.navigate("HomeAll")
+                    println("all")
+                }
+
+                1 -> {
+//                        navController.navigate("HomeGenres")
+                    println("genres")
+
+                }
+            }
             TextField(
                 modifier = Modifier
                     .fillMaxWidth()

@@ -86,4 +86,7 @@ dependencies {
 
     // pictures
     implementation("io.coil-kt:coil-compose:2.5.0")
+
+    // Preferences DataStore (onboarding)
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 }

@@ -121,19 +121,12 @@ fun MainView(
                 is Screen.Home -> {
                     HomeTopBar(mainViewModel, navController)
                 }
-//
-//                is Screen.HomeGenres -> {
-//                    HomeTopBar(mainViewModel, navController)
-//                }
-
                 is Screen.AddBook -> {
                     AddBookTopBar(mainViewModel, navController)
                 }
-
                 is Screen.EditBook -> {
                     EditBookTopBar(mainViewModel, navController)
                 }
-
                 is Screen.BookDetails -> {
                     BookDetailsTopBar(mainViewModel, navController)
                 }
@@ -150,11 +143,6 @@ fun MainView(
                 mainViewModel.getAllBooks()
                 HomeScreen(mainViewModel, navController)
             }
-//            composable(Screen.HomeGenres.route) {
-//                mainViewModel.selectedScreen(Screen.HomeGenres)
-//                mainViewModel.getAllBooks()
-////                HomeScreenGenres(mainViewModel, navController)
-//            }
             composable(Screen.AddBook.route) {
                 mainViewModel.selectedScreen(Screen.AddBook)
                 mainViewModel.getAllBooks()
@@ -422,135 +410,133 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
             ) {index ->
                 Box(modifier = Modifier.fillMaxSize()
                 ) {
-                    Text(text = tabs[index])
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = gradientColors,
+                                )
+                            )
+                            .padding(start = 14.dp, end = 14.dp, top = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        if (tabIndex == 0) {
+                            TextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .horizontalScroll(rememberScrollState()),
+                                value = searchText,
+                                onValueChange = {
+                                    searchText = it
+                                    mainViewModel.getBooksByQuery(searchText)
+                                },
+                                placeholder = { Text("Search") },
+                                leadingIcon = {
+                                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                                },
+                                trailingIcon = {
+                                    if (searchText.isNotEmpty()) {
+                                        IconButton(
+                                            onClick = {
+                                                searchText = ""
+                                                mainViewModel.getAllBooks()
+                                            }
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Clear,
+                                                contentDescription = null
+                                            )
+                                        }
+                                    }
+                                },
+                                keyboardOptions = KeyboardOptions.Default.copy(
+                                    imeAction = ImeAction.Search
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onSearch = {
+                                        mainViewModel.getBooksByQuery(searchText)
+                                    }
+                                ),
+                            )
+
+                            LazyVerticalGrid(
+                                modifier = Modifier
+                                    .heightIn(min = 200.dp)
+                                    .padding(top = 14.dp)
+                                    .weight(1f)
+                                    .fillMaxWidth(1f),
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                columns = GridCells.Fixed(3),
+                                content = {
+                                    items(books.size) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(154.dp)
+
+                                                .clickable {
+                                                    navController.navigate("${Screen.BookDetails.route}/${books[it].id}")
+                                                }
+                                        ) {
+                                            AsyncImage(
+                                                modifier = Modifier.clip(RoundedCornerShape(4.dp)),
+                                                model = books[it].cover,
+                                                contentDescription = null,
+                                                contentScale = ContentScale.Crop
+                                            )
+                                        }
+                                    }
+                                    items(3) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth(3.0f)
+                                                .height(100.dp)
+                                        )
+                                    }
+                                })
+                        } else {
+                            LazyVerticalGrid(
+                                modifier = Modifier
+                                    .heightIn(min = 200.dp)
+                                    .padding(top = 14.dp)
+                                    .weight(1f)
+                                    .fillMaxWidth(1f),
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                columns = GridCells.Fixed(3),
+                                content = {
+                                    items(books.size) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(154.dp)
+
+                                                .clickable {
+                                                    navController.navigate("${Screen.BookDetails.route}/${books[it].id}")
+                                                }
+                                        ) {
+                                            AsyncImage(
+                                                modifier = Modifier.clip(RoundedCornerShape(4.dp)),
+                                                model = books[it].cover,
+                                                contentDescription = null,
+                                                contentScale = ContentScale.Crop
+                                            )
+                                        }
+                                    }
+                                    items(3) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth(3.0f)
+                                                .height(100.dp)
+                                        )
+                                    }
+                                })
+                        }
+                    }
                 }
             }
-
-            /*Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = gradientColors,
-                        )
-                    )
-                    .padding(start = 14.dp, end = 14.dp, top = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                if (tabIndex == 0) {
-                    TextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        value = searchText,
-                        onValueChange = {
-                            searchText = it
-                            mainViewModel.getBooksByQuery(searchText)
-                        },
-                        placeholder = { Text("Search") },
-                        leadingIcon = {
-                            Icon(imageVector = Icons.Default.Search, contentDescription = null)
-                        },
-                        trailingIcon = {
-                            if (searchText.isNotEmpty()) {
-                                IconButton(
-                                    onClick = {
-                                        searchText = ""
-                                        mainViewModel.getAllBooks()
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Clear,
-                                        contentDescription = null
-                                    )
-                                }
-                            }
-                        },
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            imeAction = ImeAction.Search
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onSearch = {
-                                mainViewModel.getBooksByQuery(searchText)
-                            }
-                        ),
-                    )
-
-                    LazyVerticalGrid(
-                        modifier = Modifier
-                            .heightIn(min = 200.dp)
-                            .padding(top = 14.dp)
-                            .weight(1f)
-                            .fillMaxWidth(1f),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        columns = GridCells.Fixed(3),
-                        content = {
-                            items(books.size) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(154.dp)
-
-                                        .clickable {
-                                            navController.navigate("${Screen.BookDetails.route}/${books[it].id}")
-                                        }
-                                ) {
-                                    AsyncImage(
-                                        modifier = Modifier.clip(RoundedCornerShape(4.dp)),
-                                        model = books[it].cover,
-                                        contentDescription = null,
-                                        contentScale = ContentScale.Crop
-                                    )
-                                }
-                            }
-                            items(3) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth(3.0f)
-                                        .height(100.dp)
-                                )
-                            }
-                        })
-                } else {
-                    LazyVerticalGrid(
-                        modifier = Modifier
-                            .heightIn(min = 200.dp)
-                            .padding(top = 14.dp)
-                            .weight(1f)
-                            .fillMaxWidth(1f),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        columns = GridCells.Fixed(3),
-                        content = {
-                            items(books.size) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(154.dp)
-
-                                        .clickable {
-                                            navController.navigate("${Screen.BookDetails.route}/${books[it].id}")
-                                        }
-                                ) {
-                                    AsyncImage(
-                                        modifier = Modifier.clip(RoundedCornerShape(4.dp)),
-                                        model = books[it].cover,
-                                        contentDescription = null,
-                                        contentScale = ContentScale.Crop
-                                    )
-                                }
-                            }
-                            items(3) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth(3.0f)
-                                        .height(100.dp)
-                                )
-                            }
-                        })
-                }
-            }*/
         }
         Button(
             onClick = { navController.navigate("AddBook") },

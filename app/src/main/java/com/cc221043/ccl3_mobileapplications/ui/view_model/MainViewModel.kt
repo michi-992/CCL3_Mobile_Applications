@@ -32,6 +32,10 @@ class MainViewModel (private val dao: BookDao, private val mainActivity: MainAct
         _mainViewState.update { it.copy(selectedScreen = screen) }
     }
 
+    fun previousScreen(screenName: String) {
+        _mainViewState.update { it.copy(previousScreen = screenName) }
+    }
+
     fun getAllBooks() {
         viewModelScope.launch {
             dao.getAllBooks().collect() {books ->
@@ -71,10 +75,12 @@ class MainViewModel (private val dao: BookDao, private val mainActivity: MainAct
                     input.copyTo(output)
                 }
             }
+            println("image is saved")
             val imagePath = file.absolutePath
             book.cover = imagePath
+            clearSelectedImageURI()
         }
-
+        clearSelectedImageURI()
         runBlocking {
             insertedId = dao.insertBook(book)
             println("Saved book ID: $insertedId")
@@ -83,7 +89,7 @@ class MainViewModel (private val dao: BookDao, private val mainActivity: MainAct
 
         return insertedId
 
-        clearSelectedImageURI()
+
     }
 
     fun updateImageURI(imageURI: Uri) {

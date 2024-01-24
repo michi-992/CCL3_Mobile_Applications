@@ -2,7 +2,9 @@ package com.cc221043.ccl3_mobileapplications.ui.view
 
 import android.net.Uri
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,6 +25,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -39,11 +43,14 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButtonElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -64,8 +71,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -128,31 +137,30 @@ fun MainView(
                 }
             }
         },
-        bottomBar = {
-            if (state.value.selectedScreen == Screen.HomeAll || state.value.selectedScreen == Screen.HomeCategories) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Colors.Blue0)
-                ) {
-                    Button(
-                        onClick = {
-                            navController.navigate("AddBook")
-                        },
-                        shape = RoundedCornerShape(6.dp),
-                        colors = iconButtonColors.value,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    ) {
-                        Icon(imageVector = Icons.Default.AddCircle, contentDescription = null)
-                        Text(text = "Add book")
-                    }
-                }
-            } else {
-
-            }
-        }
+//        bottomBar = {
+//            if (state.value.selectedScreen == Screen.HomeAll || state.value.selectedScreen == Screen.HomeCategories) {
+//                Column(
+//                    horizontalAlignment = Alignment.CenterHorizontally,
+//                    verticalArrangement = Arrangement.Center,
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                ) {
+//                    Button(
+//                        onClick = {
+//                            navController.navigate("AddBook")
+//                        },
+//                        shape = RoundedCornerShape(6.dp),
+//                        colors = iconButtonColors.value,
+//                        modifier = Modifier.padding(bottom = 16.dp)
+//                    ) {
+//                        Icon(imageVector = Icons.Default.AddCircle, contentDescription = null)
+//                        Text(text = "Add book")
+//                    }
+//                }
+//            } else {
+//
+//            }
+//        }
     ) {
         NavHost(
             navController = navController,
@@ -297,42 +305,138 @@ fun HomeAllTopBar(mainViewModel: MainViewModel) {
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenAll(mainViewModel: MainViewModel, navController: NavController) {
     val state = mainViewModel.mainViewState.collectAsState()
     val books = state.value.books
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
+    var searchText by rememberSaveable { mutableStateOf("") }
 
-    LazyVerticalGrid(
+    val buttonColors = ButtonDefaults.buttonColors(
+            contentColor = Colors.OffWhite,
+            containerColor = Colors.PrimaryBlueDark,
+            disabledContentColor = Colors.OffWhite,
+            disabledContainerColor = Colors.Blue0,
+        )
+
+Box(modifier = Modifier.fillMaxSize(),) {
+    Column(
         modifier = Modifier
+            .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
                     colors = gradientColors,
                 )
             )
-            .padding(vertical = 14.dp, horizontal = 14.dp)
-            .fillMaxHeight()
-            .fillMaxWidth(),
-
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        columns = GridCells.Fixed(3),
-        content = {
-            items(books.size) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(3.0f)
-                        .height(154.dp)
-                        .clickable {
-                            navController.navigate("${Screen.BookDetails.route}/${books[it].id}")
+            .padding(start = 14.dp, end = 14.dp, top = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            value = searchText,
+            onValueChange = {
+                searchText = it
+                mainViewModel.getBooksByQuery(searchText)
+            },
+            placeholder = { Text("Search") },
+            leadingIcon = {
+                Icon(imageVector = Icons.Default.Search, contentDescription = null)
+            },
+            trailingIcon = {
+                if (searchText.isNotEmpty()) {
+                    IconButton(
+                        onClick = {
+                            searchText = ""
+                            mainViewModel.getAllBooks()
                         }
-                ) {
-                    AsyncImage(
-                        model = books[it].cover,
-                        contentDescription = null)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = null
+                        )
+                    }
                 }
-            }
-        })
+            },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Search
+            ),
+            keyboardActions = KeyboardActions(
+                onSearch = {
+                    mainViewModel.getBooksByQuery(searchText)
+                }
+            ),
+//            maxLines = 1
+        )
+
+        LazyVerticalGrid(
+            modifier = Modifier
+                .heightIn(min = 200.dp)
+                .padding(top = 14.dp)
+                .weight(1f)
+                .fillMaxWidth(1f),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            columns = GridCells.Fixed(3),
+            content = {
+                items(books.size) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(154.dp)
+
+                            .clickable {
+                                navController.navigate("${Screen.BookDetails.route}/${books[it].id}")
+                            }
+                    ) {
+                        AsyncImage(
+                            modifier = Modifier.clip(RoundedCornerShape(4.dp)),
+                            model = books[it].cover,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop
+                            )
+                    }
+                }
+                items(3) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(3.0f)
+                            .height(100.dp)
+                    )
+                }
+            })
+    }
+    Button(
+        onClick = { navController.navigate("AddBook") },
+        shape = RoundedCornerShape(8.dp),
+        colors = buttonColors,
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .padding(bottom = 10.dp)
+            .background(color = Colors.Blue1, shape = RoundedCornerShape(12.dp))
+            .padding(vertical = 10.dp, horizontal = 12.dp)
+
+    ) {
+        Row (
+            modifier = Modifier.padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            Icon(imageVector = Icons.Default.AddCircle, contentDescription = null)
+            Spacer(modifier = Modifier.size(6.dp))
+            Text(text = "Add Book", style = MaterialTheme.typography.bodyLarge)
+        }
+    }
+//        ExtendedFloatingActionButton(
+//            onClick =  { navController.navigate("AddBook") },
+//            icon = { Icon(Icons.Default.AddCircle, "Extended floating action button.") },
+//            text = { Text(text = "Add Book", style = MaterialTheme.typography.bodyLarge) },
+//            shape = RoundedCornerShape(12.dp),
+//            modifier = Modifier.padding(bottom = 16.dp).align(Alignment.BottomCenter).background(color = Colors.Blue1, shape = RoundedCornerShape(20.dp)).padding(12.dp),
+////                .border(border = BorderStroke(8.dp, color = Colors.Blue1), shape = RoundedCornerShape(12.dp)
+//        )
+}
 //    }
 
     //HomeAllTopBar { newSearchQuery ->
@@ -500,7 +604,11 @@ fun RatingBar(
             Icon(
                 painter = if(isSelected) painterResource(id = R.drawable.bat_filled) else painterResource(id = R.drawable.battybatbat),
                 contentDescription = null,
-                modifier = if(small) Modifier.size(30.dp).clickable { onRatingChanged(i)} else Modifier.size(60.dp).clickable { onRatingChanged(i)},
+                modifier = if(small) Modifier
+                    .size(30.dp)
+                    .clickable { onRatingChanged(i) } else Modifier
+                    .size(60.dp)
+                    .clickable { onRatingChanged(i) },
                 tint = Colors.Blue6
             )
         }

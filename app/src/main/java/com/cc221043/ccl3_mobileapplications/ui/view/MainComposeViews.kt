@@ -93,7 +93,7 @@ import com.google.android.material.search.SearchBar
 
 sealed class Screen(val route: String) {
     object HomeAll : Screen("HomeAll")
-    object HomeCategories : Screen("HomeCategories")
+    object HomeGenres : Screen("HomeGenres")
     object AddBook : Screen("AddBook")
     object EditBook : Screen("EditBook")
     object BookDetails : Screen("BookDetails")
@@ -106,14 +106,6 @@ fun MainView(
 ) {
     val state = mainViewModel.mainViewState.collectAsState()
     val navController = rememberNavController()
-    val iconButtonColors = rememberUpdatedState(
-        ButtonDefaults.buttonColors(
-            contentColor = Colors.OffWhite,
-            containerColor = Colors.PrimaryBlueDark,
-            disabledContentColor = Colors.OffWhite,
-            disabledContainerColor = Colors.Blue0,
-        )
-    )
 
     Scaffold(
         topBar = {
@@ -122,7 +114,7 @@ fun MainView(
                     HomeAllTopBar(mainViewModel)
                 }
 //
-                is Screen.HomeCategories -> {
+                is Screen.HomeGenres -> {
                 }
 
                 is Screen.AddBook -> {
@@ -136,31 +128,7 @@ fun MainView(
                     AddBookTopBar(mainViewModel, navController)
                 }
             }
-        },
-//        bottomBar = {
-//            if (state.value.selectedScreen == Screen.HomeAll || state.value.selectedScreen == Screen.HomeCategories) {
-//                Column(
-//                    horizontalAlignment = Alignment.CenterHorizontally,
-//                    verticalArrangement = Arrangement.Center,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                ) {
-//                    Button(
-//                        onClick = {
-//                            navController.navigate("AddBook")
-//                        },
-//                        shape = RoundedCornerShape(6.dp),
-//                        colors = iconButtonColors.value,
-//                        modifier = Modifier.padding(bottom = 16.dp)
-//                    ) {
-//                        Icon(imageVector = Icons.Default.AddCircle, contentDescription = null)
-//                        Text(text = "Add book")
-//                    }
-//                }
-//            } else {
-//
-//            }
-//        }
+        }
     ) {
         NavHost(
             navController = navController,
@@ -195,7 +163,11 @@ fun MainView(
                 val bookId = arguments.getString("bookId")!!.toInt()
 
                 mainViewModel.selectBookDetails(bookId)
-                EditBook(mainViewModel, navController, bookId, onPickImage = { pickImageLauncher.launch("image/*") })
+                EditBook(
+                    mainViewModel,
+                    navController,
+                    bookId,
+                    onPickImage = { pickImageLauncher.launch("image/*") })
             }
         }
     }
@@ -217,13 +189,13 @@ fun AddBookTopBar(mainViewModel: MainViewModel, navController: NavController) {
         navigationIcon = {
             IconButton(
                 onClick = {
-                    if(state.value.previousScreen == Screen.AddBook.route || state.value.previousScreen == Screen.EditBook.route) {
+                    if (state.value.previousScreen == Screen.AddBook.route || state.value.previousScreen == Screen.EditBook.route) {
                         navController.navigate("HomeAll")
                         mainViewModel.previousScreen("")
                     } else {
                         navController.navigateUp()
                     }
-                    },
+                },
                 colors = iconButtonColors.value
             ) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
@@ -243,7 +215,7 @@ fun AddBookTopBar(mainViewModel: MainViewModel, navController: NavController) {
 @Composable
 fun HomeAllTopBar(mainViewModel: MainViewModel) {
     var searchText by rememberSaveable { mutableStateOf("") }
-    
+
     CenterAlignedTopAppBar(
         title = {
             Row {
@@ -263,43 +235,6 @@ fun HomeAllTopBar(mainViewModel: MainViewModel) {
             }
 
         },
-//        , actions = {
-//            TextField(
-//                modifier = Modifier.fillMaxWidth(),
-//                value = searchText,
-//                onValueChange = {
-//                    searchText = it
-//                },
-//                placeholder = { Text("Search") },
-//                leadingIcon = {
-//                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
-//                },
-//                trailingIcon = {
-//                    if (searchText.isNotEmpty()) {
-//                        IconButton(
-//                            onClick = {
-//                                searchText = ""
-//                                mainViewModel.getAllBooks()
-//                            }
-//                        ) {
-//                            Icon(
-//                                imageVector = Icons.Default.Clear,
-//                                contentDescription = null
-//                            )
-//                        }
-//                    }
-//                },
-//                keyboardOptions = KeyboardOptions.Default.copy(
-//                    imeAction = ImeAction.Search
-//                ),
-//                keyboardActions = KeyboardActions(
-//                    onSearch = {
-//                        mainViewModel.getBooksByQuery(searchText)
-//                    }
-//                )
-//            )
-//        },
-
         scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     )
 }
@@ -314,134 +249,121 @@ fun HomeScreenAll(mainViewModel: MainViewModel, navController: NavController) {
     var searchText by rememberSaveable { mutableStateOf("") }
 
     val buttonColors = ButtonDefaults.buttonColors(
-            contentColor = Colors.OffWhite,
-            containerColor = Colors.PrimaryBlueDark,
-            disabledContentColor = Colors.OffWhite,
-            disabledContainerColor = Colors.Blue0,
-        )
+        contentColor = Colors.OffWhite,
+        containerColor = Colors.PrimaryBlueDark,
+        disabledContentColor = Colors.OffWhite,
+        disabledContainerColor = Colors.Blue0,
+    )
 
-Box(modifier = Modifier.fillMaxSize(),) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = gradientColors,
-                )
-            )
-            .padding(start = 14.dp, end = 14.dp, top = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        TextField(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            value = searchText,
-            onValueChange = {
-                searchText = it
-                mainViewModel.getBooksByQuery(searchText)
-            },
-            placeholder = { Text("Search") },
-            leadingIcon = {
-                Icon(imageVector = Icons.Default.Search, contentDescription = null)
-            },
-            trailingIcon = {
-                if (searchText.isNotEmpty()) {
-                    IconButton(
-                        onClick = {
-                            searchText = ""
-                            mainViewModel.getAllBooks()
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = gradientColors,
+                    )
+                )
+                .padding(start = 14.dp, end = 14.dp, top = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                value = searchText,
+                onValueChange = {
+                    searchText = it
+                    mainViewModel.getBooksByQuery(searchText)
+                },
+                placeholder = { Text("Search") },
+                leadingIcon = {
+                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                },
+                trailingIcon = {
+                    if (searchText.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                searchText = ""
+                                mainViewModel.getAllBooks()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = null
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = null
+                    }
+                },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Search
+                ),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        mainViewModel.getBooksByQuery(searchText)
+                    }
+                ),
+//            maxLines = 1
+            )
+
+            LazyVerticalGrid(
+                modifier = Modifier
+                    .heightIn(min = 200.dp)
+                    .padding(top = 14.dp)
+                    .weight(1f)
+                    .fillMaxWidth(1f),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                columns = GridCells.Fixed(3),
+                content = {
+                    items(books.size) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(154.dp)
+
+                                .clickable {
+                                    navController.navigate("${Screen.BookDetails.route}/${books[it].id}")
+                                }
+                        ) {
+                            AsyncImage(
+                                modifier = Modifier.clip(RoundedCornerShape(4.dp)),
+                                model = books[it].cover,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                    }
+                    items(3) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(3.0f)
+                                .height(100.dp)
                         )
                     }
-                }
-            },
-            keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Search
-            ),
-            keyboardActions = KeyboardActions(
-                onSearch = {
-                    mainViewModel.getBooksByQuery(searchText)
-                }
-            ),
-//            maxLines = 1
-        )
-
-        LazyVerticalGrid(
+                })
+        }
+        Button(
+            onClick = { navController.navigate("AddBook") },
+            shape = RoundedCornerShape(8.dp),
+            colors = buttonColors,
             modifier = Modifier
-                .heightIn(min = 200.dp)
-                .padding(top = 14.dp)
-                .weight(1f)
-                .fillMaxWidth(1f),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            columns = GridCells.Fixed(3),
-            content = {
-                items(books.size) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(154.dp)
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 10.dp)
+                .background(color = Colors.Blue1, shape = RoundedCornerShape(12.dp))
+                .padding(vertical = 10.dp, horizontal = 12.dp)
 
-                            .clickable {
-                                navController.navigate("${Screen.BookDetails.route}/${books[it].id}")
-                            }
-                    ) {
-                        AsyncImage(
-                            modifier = Modifier.clip(RoundedCornerShape(4.dp)),
-                            model = books[it].cover,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop
-                            )
-                    }
-                }
-                items(3) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(3.0f)
-                            .height(100.dp)
-                    )
-                }
-            })
-    }
-    Button(
-        onClick = { navController.navigate("AddBook") },
-        shape = RoundedCornerShape(8.dp),
-        colors = buttonColors,
-        modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .padding(bottom = 10.dp)
-            .background(color = Colors.Blue1, shape = RoundedCornerShape(12.dp))
-            .padding(vertical = 10.dp, horizontal = 12.dp)
-
-    ) {
-        Row (
-            modifier = Modifier.padding(vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ){
-            Icon(imageVector = Icons.Default.AddCircle, contentDescription = null)
-            Spacer(modifier = Modifier.size(6.dp))
-            Text(text = "Add Book", style = MaterialTheme.typography.bodyLarge)
+        ) {
+            Row(
+                modifier = Modifier.padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(imageVector = Icons.Default.AddCircle, contentDescription = null)
+                Spacer(modifier = Modifier.size(6.dp))
+                Text(text = "Add Book", style = MaterialTheme.typography.bodyLarge)
+            }
         }
     }
-//        ExtendedFloatingActionButton(
-//            onClick =  { navController.navigate("AddBook") },
-//            icon = { Icon(Icons.Default.AddCircle, "Extended floating action button.") },
-//            text = { Text(text = "Add Book", style = MaterialTheme.typography.bodyLarge) },
-//            shape = RoundedCornerShape(12.dp),
-//            modifier = Modifier.padding(bottom = 16.dp).align(Alignment.BottomCenter).background(color = Colors.Blue1, shape = RoundedCornerShape(20.dp)).padding(12.dp),
-////                .border(border = BorderStroke(8.dp, color = Colors.Blue1), shape = RoundedCornerShape(12.dp)
-//        )
-}
-//    }
-
-    //HomeAllTopBar { newSearchQuery ->
-    //    HomeScreenAll(mainViewModel, navController, newSearchQuery)
-    //}
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -523,16 +445,16 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                 onValueChange = { newText -> synopsis = newText },
                 label = { Text(text = "Synopsis") })
 
-            Row (
+            Row(
                 Modifier.horizontalScroll(rememberScrollState())
-            ){
+            ) {
                 Button(
                     onClick = {
                         status = "Not started"
                         rating = 0
                     }
                 ) {
-                    Row{
+                    Row {
                         Icon(imageVector = Icons.Default.Clear, contentDescription = null)
                         Text(text = "Not started")
                     }
@@ -569,7 +491,7 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                 }
             }
 
-            
+
             Button(onClick = {
                 val newBook = Book(
                     title = title,
@@ -602,9 +524,11 @@ fun RatingBar(
         for (i in 1..5) {
             val isSelected = i <= rating
             Icon(
-                painter = if(isSelected) painterResource(id = R.drawable.bat_filled) else painterResource(id = R.drawable.battybatbat),
+                painter = if (isSelected) painterResource(id = R.drawable.bat_filled) else painterResource(
+                    id = R.drawable.battybatbat
+                ),
                 contentDescription = null,
-                modifier = if(small) Modifier
+                modifier = if (small) Modifier
                     .size(30.dp)
                     .clickable { onRatingChanged(i) } else Modifier
                     .size(60.dp)
@@ -654,7 +578,10 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = "Author: ${book.author}", style = MaterialTheme.typography.displayMedium)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Platform/Format: ${book.platformat}", style = MaterialTheme.typography.displayMedium)
+        Text(
+            text = "Platform/Format: ${book.platformat}",
+            style = MaterialTheme.typography.displayMedium
+        )
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = "Synopsis: ${book.synopsis}", style = MaterialTheme.typography.displayMedium)
         Spacer(modifier = Modifier.height(8.dp))
@@ -770,7 +697,7 @@ fun EditBook(
         )
 
         Column {
-            if(state.value.selectedImageURI == Uri.parse("")) {
+            if (state.value.selectedImageURI == Uri.parse("")) {
                 AsyncImage(
                     model = book.cover,
                     contentDescription = null,
@@ -850,16 +777,16 @@ fun EditBook(
                 label = { Text(text = "Synopsis") }
             )
 
-            Row (
+            Row(
                 Modifier.horizontalScroll(rememberScrollState())
-            ){
+            ) {
                 Button(
                     onClick = {
                         status = "Not started"
                         rating = 0
                     }
                 ) {
-                    Row{
+                    Row {
                         Icon(imageVector = Icons.Default.Clear, contentDescription = null)
                         Text(text = "Not started")
                     }
@@ -883,7 +810,7 @@ fun EditBook(
                     }
                 }
             }
-            if(status == "Finished") {
+            if (status == "Finished") {
                 RatingBar(
                     rating = rating, onRatingChanged = {
                         rating = it

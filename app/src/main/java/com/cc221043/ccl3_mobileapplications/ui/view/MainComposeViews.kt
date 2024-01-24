@@ -456,7 +456,9 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                 RatingBar(
                     rating = rating, onRatingChanged = {
                         rating = it
-                    }, modifier = Modifier.padding(16.dp)
+                    },
+                    modifier = Modifier.padding(16.dp),
+                    small = false
                 )
                 Button(onClick = { rating = 0 }) {
                     Text(text = "Clear")
@@ -486,7 +488,7 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
 
 @Composable
 fun RatingBar(
-    rating: Int, onRatingChanged: (Int) -> Unit, modifier: Modifier = Modifier
+    rating: Int, onRatingChanged: (Int) -> Unit, modifier: Modifier = Modifier, small: Boolean
 ) {
     Row(
         modifier = modifier,
@@ -495,14 +497,12 @@ fun RatingBar(
     ) {
         for (i in 1..5) {
             val isSelected = i <= rating
-            Icon(imageVector = if(isSelected) Icons.Default.Star else Icons.Outlined.Star,
+            Icon(
+                painter = if(isSelected) painterResource(id = R.drawable.bat_filled) else painterResource(id = R.drawable.battybatbat),
                 contentDescription = null,
-                tint = if (isSelected) Color.Yellow else Color.Gray,
-                modifier = Modifier
-                    .size(32.dp)
-                    .clickable {
-                        onRatingChanged(i)
-                    })
+                modifier = if(small) Modifier.size(30.dp).clickable { onRatingChanged(i)} else Modifier.size(60.dp).clickable { onRatingChanged(i)},
+                tint = Colors.Blue6
+            )
         }
     }
 }
@@ -553,7 +553,7 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
         Text(text = "Status: ${book.status}", style = MaterialTheme.typography.displayMedium)
         Spacer(modifier = Modifier.height(8.dp))
         if (book.rating != 0 && book.status == "Finished") {
-            RatingBar(rating = book.rating, onRatingChanged = {})
+            RatingBar(rating = book.rating, onRatingChanged = {}, small = true)
         }
 
 
@@ -779,7 +779,9 @@ fun EditBook(
                 RatingBar(
                     rating = rating, onRatingChanged = {
                         rating = it
-                    }, modifier = Modifier.padding(16.dp)
+                    },
+                    modifier = Modifier.padding(16.dp),
+                    small = false
                 )
                 Button(onClick = { rating = 0 }) {
                     Text(text = "Clear")

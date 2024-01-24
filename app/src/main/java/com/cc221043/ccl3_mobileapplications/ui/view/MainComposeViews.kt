@@ -1,5 +1,6 @@
 package com.cc221043.ccl3_mobileapplications.ui.view
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.background
@@ -18,9 +19,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -38,6 +40,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -63,10 +66,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -75,12 +80,10 @@ import com.cc221043.ccl3_mobileapplications.R
 import com.cc221043.ccl3_mobileapplications.data.model.Book
 import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
-import com.google.android.material.search.SearchBar
-
 
 sealed class Screen(val route: String) {
     object HomeAll : Screen("HomeAll")
-    object HomeCategories : Screen("HomeCategories")
+    object HomeGenres : Screen("HomeGenres")
     object AddBook : Screen("AddBook")
     object EditBook : Screen("EditBook")
     object BookDetails : Screen("BookDetails")
@@ -108,45 +111,9 @@ fun MainView(
                 is Screen.HomeAll -> {
                     HomeAllTopBar(mainViewModel) {
                     }
-//                    var tabIndex by remember {
-//                        mutableIntStateOf(0)
-//                    }
-//                    val tabs = listOf("All Books", "Categories")
-//
-//                    TabRow(
-//                        selectedTabIndex = tabIndex,
-//                        divider = {
-//                            // Customize the divider appearance here
-//                            Spacer(
-//                                modifier = Modifier
-//                                    .height(2.dp)
-//                                    .fillMaxWidth() // Width of the divider
-//                                    .background(Colors.Blue4) // Color of the divider
-//                            )
-//                        }
-//                    ) {
-//                        tabs.forEachIndexed { index, title ->
-//                            Tab(text = { Text(title) },
-//                                selected = tabIndex == index,
-//                                onClick = { tabIndex = index }
-//                            )
-//                        }
-//                    }
-//// Use the updated tabIndex to determine the selected tab
-//                    when (tabIndex) {
-//                        0 -> {
-//                            println("Selected Tab: All Books")
-//                            // Handle the content for the "All Books" tab
-//                        }
-//
-//                        1 -> {
-//                            println("Selected Tab: Categories")
-//                            // Handle the content for the "Categories" tab
-//                        }
-//                    }
                 }
 
-                is Screen.HomeCategories -> {
+                is Screen.HomeGenres -> {
                 }
 
                 is Screen.AddBook -> {
@@ -162,7 +129,7 @@ fun MainView(
             }
         },
         bottomBar = {
-            if (state.value.selectedScreen == Screen.HomeAll || state.value.selectedScreen == Screen.HomeCategories) {
+            if (state.value.selectedScreen == Screen.HomeAll || state.value.selectedScreen == Screen.HomeGenres) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
@@ -170,6 +137,17 @@ fun MainView(
                         .fillMaxWidth()
                         .background(Colors.Blue0)
                 ) {
+                    Button(
+                        onClick = {
+                            navController.navigate("HomeGenres")
+                        },
+                        shape = RoundedCornerShape(6.dp),
+                        colors = iconButtonColors.value,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    ) {
+                        Icon(imageVector = Icons.Default.AddCircle, contentDescription = null)
+                        Text(text = "Genres")
+                    }
                     Button(
                         onClick = {
                             navController.navigate("AddBook")
@@ -194,6 +172,11 @@ fun MainView(
                 mainViewModel.selectedScreen(Screen.HomeAll)
                 mainViewModel.getAllBooks()
                 HomeScreenAll(mainViewModel, navController)
+            }
+            composable(Screen.HomeGenres.route) {
+                mainViewModel.selectedScreen(Screen.HomeGenres)
+                mainViewModel.getAllBooks()
+                HomeScreenGenres(mainViewModel, navController)
             }
             composable(Screen.AddBook.route) {
                 mainViewModel.selectedScreen(Screen.AddBook)
@@ -220,6 +203,8 @@ fun MainView(
         }
     }
 }
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -322,19 +307,6 @@ fun HomeScreenAll(mainViewModel: MainViewModel, navController: NavController) {
     val books = state.value.books
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
 
-//    Box(
-//        Modifier
-//            .fillMaxHeight(9.0f)
-//            .fillMaxWidth()
-//            .background(
-//                brush = Brush.verticalGradient(
-//                    colors = gradientColors
-//                )
-//            )
-//            .verticalScroll(rememberScrollState())
-//
-//    ) {
-
     LazyVerticalGrid(
         modifier = Modifier
             .background(
@@ -364,37 +336,74 @@ fun HomeScreenAll(mainViewModel: MainViewModel, navController: NavController) {
                         contentDescription = null)
                 }
             }
-        })
-//    }
-
-    //HomeAllTopBar { newSearchQuery ->
-    //    HomeScreenAll(mainViewModel, navController, newSearchQuery)
-    //}
+        }
+    )
 }
+
+@Composable
+fun HomeScreenGenres(mainViewModel: MainViewModel, navController: NavHostController) {
+    val state = mainViewModel.mainViewState.collectAsState()
+    val genres = stringArrayResource(id = R.array.genres)
+
+    LazyVerticalGrid(
+        modifier = Modifier
+            .padding(vertical = 14.dp, horizontal = 14.dp)
+            .fillMaxHeight()
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        columns = GridCells.Fixed(3),
+        content = {
+            items(genres.size) { index ->
+                GenreButton(
+                    genre = genres[index],
+                    onClick = {
+                        mainViewModel.getBooksByGenre(genres[index])
+                        navController.navigate(Screen.HomeGenres.route)
+                    }
+                )
+            }
+        }
+    )
+}
+
+
+@Composable
+fun GenreButton(genre: String, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        shape = RoundedCornerShape(6.dp),
+        colors = ButtonDefaults.buttonColors(
+            contentColor = Colors.OffWhite,
+            containerColor = Colors.PrimaryBlueDark,
+            disabledContentColor = Colors.OffWhite,
+            disabledContainerColor = Colors.Blue0,
+        ),
+        modifier = Modifier
+            .height(48.dp)
+            .fillMaxWidth()
+    ) {
+        Text(text = genre)
+    }
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickImage: () -> Unit) {
     val state = mainViewModel.mainViewState.collectAsState()
+    var title by rememberSaveable { mutableStateOf("") }
+    var author by rememberSaveable { mutableStateOf("") }
+    var platformat by rememberSaveable { mutableStateOf("") }
+    var synopsis by rememberSaveable { mutableStateOf("") }
+    var status by rememberSaveable { mutableStateOf("") }
+    var selectedGenres by remember { mutableStateOf(emptySet<String>()) }
+    val genres = stringArrayResource(id = R.array.genres)
+
     Column(
         Modifier.verticalScroll(rememberScrollState())
     ) {
-        var title by rememberSaveable { mutableStateOf("") }
-        var author by rememberSaveable { mutableStateOf("") }
-        var platformat by rememberSaveable { mutableStateOf("") }
-        var synopsis by rememberSaveable { mutableStateOf("") }
-        var status by rememberSaveable { mutableStateOf("") }
-
-        val iconButtonColors = rememberUpdatedState(
-            IconButtonDefaults.iconButtonColors(
-                contentColor = Colors.OffWhite,
-                containerColor = Colors.Blue0,
-                disabledContentColor = Colors.OffWhite,
-                disabledContainerColor = Colors.Blue0,
-            )
-        )
-
-        Column {
+        Row {
             if (state.value.selectedImageURI == Uri.parse("")) {
                 Button(
                     onClick = {
@@ -408,85 +417,104 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                     )
                 }
             }
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 20.dp),
-                value = title,
-                onValueChange = { newText -> title = newText },
-                label = { Text(text = "Title") })
+        }
 
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 20.dp),
-                value = author,
-                onValueChange = { newText -> author = newText },
-                label = { Text(text = "Author") })
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp),
+            value = title,
+            onValueChange = { newText -> title = newText },
+            label = { Text(text = "Title") })
 
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 20.dp),
-                value = platformat,
-                onValueChange = { newText -> platformat = newText },
-                label = { Text(text = "Platform/Format") })
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp),
+            value = author,
+            onValueChange = { newText -> author = newText },
+            label = { Text(text = "Author") })
 
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(vertical = 20.dp),
-                value = synopsis,
-                onValueChange = { newText -> synopsis = newText },
-                label = { Text(text = "Synopsis") })
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp),
+            value = platformat,
+            onValueChange = { newText -> platformat = newText },
+            label = { Text(text = "Platform/Format") })
 
-            Row (
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .padding(vertical = 20.dp),
+            value = synopsis,
+            onValueChange = { newText -> synopsis = newText },
+            label = { Text(text = "Synopsis") })
+
+        genres.forEach { genre ->
+            Row(
                 Modifier.horizontalScroll(rememberScrollState())
-            ){
-                Button(
-                    onClick = { status = "Not started" }
-                ) {
-                    Row{
-                        Icon(imageVector = Icons.Default.Clear, contentDescription = null)
-                        Text(text = "Not started")
-                    }
-                }
-                Button(onClick = {
-                    status = "In Progress"
-                }) {
-                    Row {
-                        Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)
-                        Text(text = "In Progress")
-                    }
-
-                }
-                Button(onClick = {
-                    status = "Finished"
-                }) {
-                    Row {
-                        Icon(imageVector = Icons.Default.Check, contentDescription = null)
-                        Text(text = "Finished")
-                    }
-                }
-            }
-
-
-            Button(onClick = {
-                val newBook = Book(
-                    title = title,
-                    author = author,
-                    platformat = platformat,
-                    rating = 3,
-                    synopsis = synopsis,
-                    status = status
+            ) {
+                Checkbox(
+                    checked = selectedGenres.contains(genre),
+                    onCheckedChange = {
+                        selectedGenres = if (selectedGenres.contains(genre)) {
+                            selectedGenres - genre
+                        } else {
+                            selectedGenres + genre
+                        }
+                    },
+                    modifier = Modifier.padding(end = 8.dp)
                 )
-
-                val insertedId = mainViewModel.saveBookAndImage(newBook)
-                navController.navigate("${Screen.BookDetails.route}/$insertedId")
-            }) {
-                Text(text = "Save book")
+                Text(text = genre)
             }
+        }
+
+        Row(
+            Modifier.horizontalScroll(rememberScrollState())
+        ) {
+            Button(
+                onClick = { status = "Not started" }
+            ) {
+                Row {
+                    Icon(imageVector = Icons.Default.Clear, contentDescription = null)
+                    Text(text = "Not started")
+                }
+            }
+            Button(onClick = {
+                status = "In Progress"
+            }) {
+                Row {
+                    Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)
+                    Text(text = "In Progress")
+                }
+            }
+            Button(onClick = {
+                status = "Finished"
+            }) {
+                Row {
+                    Icon(imageVector = Icons.Default.Check, contentDescription = null)
+                    Text(text = "Finished")
+                }
+            }
+        }
+
+        Button(onClick = {
+            val newBook = Book(
+                title = title,
+                author = author,
+                platformat = platformat,
+                rating = 3,
+                synopsis = synopsis,
+                status = status,
+                genres = selectedGenres.toList() // Convert set to list
+            )
+
+            val insertedId = mainViewModel.saveBookAndImage(newBook)
+            navController.navigate("${Screen.BookDetails.route}/$insertedId")
+        }) {
+            Text(text = "Save book")
         }
     }
 }
@@ -621,24 +649,16 @@ fun EditBook(
     val state = mainViewModel.mainViewState.collectAsState()
     val book = state.value.selectedBook ?: return
 
+    var title by rememberSaveable { mutableStateOf(book.title) }
+    var author by rememberSaveable { mutableStateOf(book.author) }
+    var platformat by rememberSaveable { mutableStateOf(book.platformat) }
+    var synopsis by rememberSaveable { mutableStateOf(book.synopsis) }
+    var status by rememberSaveable { mutableStateOf(book.status) }
+    var selectedGenres by remember { mutableStateOf(book.genres.toSet()) }
+
     Column(
         Modifier.verticalScroll(rememberScrollState())
     ) {
-        var title by rememberSaveable { mutableStateOf(book.title) }
-        var author by rememberSaveable { mutableStateOf(book.author) }
-        var platformat by rememberSaveable { mutableStateOf(book.platformat) }
-        var synopsis by rememberSaveable { mutableStateOf(book.synopsis) }
-        var status by rememberSaveable { mutableStateOf(book.status) }
-
-        val iconButtonColors = rememberUpdatedState(
-            IconButtonDefaults.iconButtonColors(
-                contentColor = Colors.OffWhite,
-                containerColor = Colors.Blue0,
-                disabledContentColor = Colors.OffWhite,
-                disabledContainerColor = Colors.Blue0,
-            )
-        )
-
         Column {
             AsyncImage(
                 model = book.cover,
@@ -700,13 +720,34 @@ fun EditBook(
                 label = { Text(text = "Synopsis") }
             )
 
-            Row (
+            val genres = stringArrayResource(id = R.array.genres)
+
+            genres.forEach { genre ->
+                Row(
+                    Modifier.horizontalScroll(rememberScrollState())
+                ) {
+                    Checkbox(
+                        checked = selectedGenres.contains(genre),
+                        onCheckedChange = {
+                            selectedGenres = if (selectedGenres.contains(genre)) {
+                                selectedGenres - genre
+                            } else {
+                                selectedGenres + genre
+                            }
+                        },
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                    Text(text = genre)
+                }
+            }
+
+            Row(
                 Modifier.horizontalScroll(rememberScrollState())
-            ){
+            ) {
                 Button(
                     onClick = { status = "Not started" }
                 ) {
-                    Row{
+                    Row {
                         Icon(imageVector = Icons.Default.Clear, contentDescription = null)
                         Text(text = "Not started")
                     }
@@ -718,7 +759,6 @@ fun EditBook(
                         Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)
                         Text(text = "In Progress")
                     }
-
                 }
                 Button(onClick = {
                     status = "Finished"
@@ -733,13 +773,14 @@ fun EditBook(
             Button(
                 onClick = {
                     val editedBook = Book(
-                        id = book.id,
                         title = title,
                         author = author,
+                        status = status,
                         platformat = platformat,
-                        rating = 3,
                         synopsis = synopsis,
-                        status = status
+                        rating = 3,
+                        id = book.id,
+                        genres = selectedGenres.toList()
                     )
 
                     mainViewModel.updateBookAndImage(editedBook)

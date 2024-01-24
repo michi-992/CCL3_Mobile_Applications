@@ -27,4 +27,7 @@ interface BookDao {
 
     @Query("SELECT * FROM books WHERE LOWER(title) LIKE LOWER('%' || :searchText || '%')")
     fun getBooksBySearch(searchText: String): Flow<List<Book>>
+
+    @Query("SELECT * FROM books WHERE genre = :selectedGenre")
+    fun getBooksByGenre(selectedGenre: String): Flow<List<Book>>
 }

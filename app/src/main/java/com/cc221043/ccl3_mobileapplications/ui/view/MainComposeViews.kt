@@ -83,6 +83,7 @@ import com.cc221043.ccl3_mobileapplications.data.model.Book
 import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
 import androidx.compose.foundation.lazy.items
+import com.cc221043.ccl3_mobileapplications.data.BookDao
 
 sealed class Screen(val route: String) {
     object Home : Screen("Home")
@@ -289,6 +290,7 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
 fun HomeScreenAllBooks(books: List<Book>, navController: NavController, mainViewModel: MainViewModel) {
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
     var searchText by rememberSaveable { mutableStateOf("") }
+val state = mainViewModel.mainViewState.collectAsState()
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -434,6 +436,9 @@ fun HomeScreenGenres(books: List<Book>, navController: NavController, mainViewMo
 @Composable
 fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickImage: () -> Unit) {
     val state = mainViewModel.mainViewState.collectAsState()
+    val genreArray = stringArrayResource(id = R.array.genres)
+    var selectedGenres by remember { mutableStateOf(emptyList<String>()) }
+
     Column(
         Modifier.verticalScroll(rememberScrollState())
     ) {
@@ -554,6 +559,22 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                     Text(text = "Clear")
                 }
             }
+            LazyRow {
+                items(genreArray) { name ->
+                    GenreButton(
+                        name = name,
+                        isSelected = selectedGenres.contains(name),
+                        onNameClicked = {
+                            selectedGenres = if (selectedGenres.contains(name)) {
+                                selectedGenres - name
+                            } else {
+                                selectedGenres + name
+                            }
+                            println(selectedGenres)
+                        }
+                    )
+                }
+            }
 
 
             Button(onClick = {
@@ -563,7 +584,8 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                     platformat = platformat,
                     rating = rating,
                     synopsis = synopsis,
-                    status = status
+                    status = status,
+                    genres = selectedGenres
                 )
 
                 mainViewModel.previousScreen(state.value.selectedScreen.route)
@@ -741,6 +763,9 @@ fun EditBook(
     val state = mainViewModel.mainViewState.collectAsState()
     val book = state.value.selectedBook ?: return
 
+    val genreArray = stringArrayResource(id = R.array.genres)
+    var selectedGenres by remember { mutableStateOf(book.genres) }
+
     Column(
         Modifier.verticalScroll(rememberScrollState())
     ) {
@@ -886,6 +911,22 @@ fun EditBook(
                     Text(text = "Clear")
                 }
             }
+            LazyRow {
+                items(genreArray) { name ->
+                    GenreButton(
+                        name = name,
+                        isSelected = selectedGenres.contains(name),
+                        onNameClicked = {
+                            selectedGenres = if (selectedGenres.contains(name)) {
+                                selectedGenres - name
+                            } else {
+                                selectedGenres + name
+                            }
+                            println(selectedGenres)
+                        }
+                    )
+                }
+            }
 
 
             Button(
@@ -898,7 +939,8 @@ fun EditBook(
                         rating = rating,
                         synopsis = synopsis,
                         status = status,
-                        cover = book.cover
+                        cover = book.cover,
+                        genres = selectedGenres
                     )
                     mainViewModel.previousScreen(state.value.selectedScreen.route)
                     mainViewModel.updateBookAndImage(editedBook)

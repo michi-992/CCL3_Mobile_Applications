@@ -97,7 +97,7 @@ import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
             },
             title = {
                 Text(
-                    text = "Add Book",
+                    text = "Edit Book",
                     style = MaterialTheme.typography.titleSmall
                 )
             },

@@ -60,6 +60,14 @@ class MainViewModel (private val dao: BookDao, private val mainActivity: MainAct
         }
     }
 
+//    fun getBooksByGenreQuery(searchText: String) {
+//        viewModelScope.launch {
+//            dao.getBooksByGenres(searchText).collect() {books ->
+//                _mainViewState.update { it.copy(test = books) }
+//            }
+//        }
+//    }
+
     fun saveBookAndImage(book: Book): Long {
         var insertedId: Long = -1
 

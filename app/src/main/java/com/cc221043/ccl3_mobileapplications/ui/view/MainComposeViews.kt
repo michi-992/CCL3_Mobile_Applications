@@ -169,7 +169,7 @@ fun MainView(
 fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
     val state = mainViewModel.mainViewState.collectAsState()
     val books = state.value.books
-    val booksForGenres = state.value.booksForGenres
+
 
     val buttonColors = ButtonDefaults.buttonColors(
         contentColor = Colors.OffWhite,
@@ -257,7 +257,7 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
                     }
 
                     1 -> {
-                        HomeScreenGenres(booksForGenres, navController, mainViewModel)
+                        HomeScreenGenres(navController, mainViewModel)
                     }
                 }
             }
@@ -290,7 +290,7 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
 fun HomeScreenAllBooks(books: List<Book>, navController: NavController, mainViewModel: MainViewModel) {
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
     var searchText by rememberSaveable { mutableStateOf("") }
-val state = mainViewModel.mainViewState.collectAsState()
+    val state = mainViewModel.mainViewState.collectAsState()
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -392,10 +392,13 @@ fun BookGrid(mainViewModel: MainViewModel, navController: NavController, books: 
 }
 
 @Composable
-fun HomeScreenGenres(books: List<Book>, navController: NavController, mainViewModel: MainViewModel) {
+fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel) {
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
     val genreArray = stringArrayResource(id = R.array.genres)
     var selectedNames by remember { mutableStateOf(emptyList<String>()) }
+    val state = mainViewModel.mainViewState.collectAsState()
+    val books = if(state.value.selectedBooksForGenres.isEmpty() && selectedNames.isEmpty()) state.value.booksForGenres else state.value.selectedBooksForGenres
+
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -423,6 +426,7 @@ fun HomeScreenGenres(books: List<Book>, navController: NavController, mainViewMo
                                 selectedNames + name
                             }
                             println(selectedNames)
+                            mainViewModel.updateSelectedGenres(selectedNames)
                         }
                     )
                 }

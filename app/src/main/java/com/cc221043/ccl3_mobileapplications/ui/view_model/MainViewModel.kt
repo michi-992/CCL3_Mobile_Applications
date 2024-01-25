@@ -60,13 +60,18 @@ class MainViewModel (private val dao: BookDao, private val mainActivity: MainAct
         }
     }
 
-//    fun getBooksByGenreQuery(searchText: String) {
-//        viewModelScope.launch {
-//            dao.getBooksByGenres(searchText).collect() {books ->
-//                _mainViewState.update { it.copy(test = books) }
-//            }
-//        }
-//    }
+    fun updateSelectedGenres(genres: List<String>) {
+        val selectedBooks = _mainViewState.value.booksForGenres.filter { book ->
+            book.genres.containsAll(genres)
+        }
+        _mainViewState.update { it.copy(selectedBooksForGenres = selectedBooks) }
+        print("genres ")
+        println(genres)
+        print("Selected Book for genres ")
+        println(_mainViewState.value.selectedBooksForGenres)
+    }
+
+
 
     fun saveBookAndImage(book: Book): Long {
         var insertedId: Long = -1

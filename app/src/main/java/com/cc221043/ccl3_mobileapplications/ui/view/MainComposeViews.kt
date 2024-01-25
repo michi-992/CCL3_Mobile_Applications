@@ -83,6 +83,9 @@ import com.cc221043.ccl3_mobileapplications.data.model.Book
 import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.draw.shadow
 import com.cc221043.ccl3_mobileapplications.data.BookDao
 
 sealed class Screen(val route: String) {
@@ -307,9 +310,21 @@ fun HomeScreenAllBooks(books: List<Book>, navController: NavController, mainView
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TextField(
+                colors = TextFieldDefaults.textFieldColors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    containerColor = Colors.Blue1,
+                    focusedLeadingIconColor = Colors.OffWhite,
+                    textColor = Colors.OffWhite,
+                    unfocusedLeadingIconColor = Colors.Blue5,
+                    focusedTrailingIconColor = Colors.OffWhite,
+                    placeholderColor = Colors.Blue5
+                ),
+                singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
+                    .shadow(shape = CircleShape, elevation = 6.dp),
+                shape = CircleShape,
                 value = searchText,
                 onValueChange = {
                     searchText = it
@@ -317,7 +332,10 @@ fun HomeScreenAllBooks(books: List<Book>, navController: NavController, mainView
                 },
                 placeholder = { Text("Search") },
                 leadingIcon = {
-                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null
+                    )
                 },
                 trailingIcon = {
                     if (searchText.isNotEmpty()) {

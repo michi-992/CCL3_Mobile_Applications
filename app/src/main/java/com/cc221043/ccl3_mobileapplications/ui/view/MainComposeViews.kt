@@ -91,6 +91,7 @@ import com.cc221043.ccl3_mobileapplications.data.model.Book
 import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
 import com.cc221043.ccl3_mobileapplications.ui.view_model.OnboardingViewModel
+import kotlinx.coroutines.delay
 
 
 sealed class Screen(val route: String) {
@@ -149,6 +150,7 @@ fun MainView(
                 HomeScreen(mainViewModel, navController)
             }
             composable(Screen.Onboarding.route) {
+                mainViewModel.selectedScreen(Screen.Onboarding)
                 OnboardingScreen(onboardingViewModel, navController)
             }
             composable(Screen.AddBook.route) {
@@ -375,25 +377,34 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
         ) {
             when (index) {
                 0 -> {
-                    Text(text = "Boom")
+                    Text(text = "")
+                    LaunchedEffect(Unit) {
+                        delay(5000)
+                        index++
+                    }
                 }
                 1 -> {
-                    Text("Boom 2")
+                    Text("Boom 1")
                 }
                 2 -> {
+                    Text("Boom 2")
+                }
+                3 -> {
                     Text("Boom 3")
                 }
             }
 
-            // Buttons associated with each onboarding screen
-            Button(onClick = {
-                onboardingViewModel.completeOnboarding()
-                navController.navigate(Screen.Home.route)
-            }) {
-                Text("Skip")
+            if (index != 0) {
+                Button(onClick = {
+                    onboardingViewModel.completeOnboarding()
+                    navController.navigate(Screen.Home.route)
+                }) {
+                    Text("Skip")
+                }
             }
 
-            Button(onClick = {
+            if (index != 0) {
+                Button(onClick = {
 //                when (navController.currentBackStackEntry?.destination?.route) {
 //                    Screen.Onboarding1.route -> navController.navigate(Screen.Onboarding2.route)
 //                    Screen.Onboarding2.route -> navController.navigate(Screen.Onboarding3.route)
@@ -402,141 +413,15 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
 //                        navController.navigate(Screen.Home.route)
 //                    }
 //                }
-                index++
-            }) {
-                Text("Next")
+                    index++
+                }) {
+                    Text("Next")
+                }
             }
         }
     }
 }
 
-//    when (currentScreen) {
-//        Screen.Onboarding1 -> {
-//            Image(
-//                painter = painterResource(id = R.drawable.bat_filled),
-//                contentDescription = null,
-//                modifier = Modifier.fillMaxWidth().height(200.dp)
-//            )
-//            Text("Onboarding 1")
-//            Text("Onboarding 1 Description")
-//        }
-//        Screen.Onboarding2 -> {
-//            Image(
-//                painter = painterResource(id = R.drawable.battybatbat),
-//                contentDescription = null,
-//                modifier = Modifier.fillMaxWidth().height(200.dp)
-//            )
-//            Text("Onboarding 2")
-//            Text("Onboarding 2 Description")
-//        }
-//        Screen.Onboarding3 -> {
-//            Image(
-//                painter = painterResource(id = R.drawable.bat_filled),
-//                contentDescription = null,
-//                modifier = Modifier.fillMaxWidth().height(200.dp)
-//            )
-//            Text("Onboarding 3")
-//            Text("Onboarding 3 Description")
-//        } else -> {
-//            Text("")
-//        }
-//    }
-//
-//    Button(onClick = {
-//        onboardingViewModel.completeOnboarding()
-//        navController.navigate(Screen.Home.route)
-//    }) {
-//        Text("Skip")
-//    }
-//
-//    Button(onClick = {
-//        when (navController.currentBackStackEntry?.destination?.route) {
-//            Screen.Onboarding1.route -> navController.navigate(Screen.Onboarding2.route)
-//            Screen.Onboarding2.route -> navController.navigate(Screen.Onboarding3.route)
-//            Screen.Onboarding3.route -> {
-//                onboardingViewModel.completeOnboarding()
-//                navController.navigate(Screen.Home.route)
-//            }
-//        }
-//    }) {
-//        Text("Next")
-//    }
-
-
-//@OptIn(ExperimentalFoundationApi::class)
-//@Composable
-//fun OnboardingViewPager(
-//    onboardingPages: List<OnboardingPage>,
-//    onboardingViewModel: OnboardingViewModel,
-//    navController: NavController
-//) {
-//    val pagerState = rememberPagerState { 5 }
-//
-//    HorizontalPager(
-//        state = pagerState,
-//        modifier = Modifier.fillMaxSize()
-//    ) { page ->
-//        OnboardingPageContent(onboardingPage = onboardingPages[page])
-//
-//        // Last onboarding page
-//        if (page == onboardingPages.size - 1) {
-//            Button(
-//                onClick = {
-//                    onboardingViewModel.completeOnboarding()
-//                    navController.navigate(Screen.Home.route)
-//                },
-//                modifier = Modifier
-//                    .padding(16.dp)
-//                    .fillMaxWidth()
-//            ) {
-//                Text("Get Started")
-//            }
-//        }
-//    }
-//}
-//
-//@Composable
-//fun OnboardingPageContent(onboardingPage: OnboardingPage) {
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .padding(16.dp),
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        verticalArrangement = Arrangement.Center
-//    ) {
-//        // Display onboarding image
-//        Image(
-//            painter = painterResource(id = onboardingPage.image),
-//            contentDescription = null,
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(200.dp)
-//                .clip(shape = RoundedCornerShape(8.dp)),
-//            contentScale = ContentScale.Crop
-//        )
-//
-//        Spacer(modifier = Modifier.height(16.dp))
-//
-//        Text(
-//            text = onboardingPage.title,
-//            style = MaterialTheme.typography.titleLarge
-//        )
-//
-//        Spacer(modifier = Modifier.height(8.dp))
-//
-//        Text(
-//            text = onboardingPage.description,
-//            style = MaterialTheme.typography.bodyMedium,
-//            textAlign = TextAlign.Center
-//        )
-//    }
-//}
-//
-//data class OnboardingPage(
-//    val title: String,
-//    val description: String,
-//    val image: Int
-//)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable

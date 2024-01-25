@@ -5,7 +5,7 @@ import com.cc221043.ccl3_mobileapplications.data.model.Book
 import com.cc221043.ccl3_mobileapplications.ui.view.Screen
 
 data class MainViewState (
-    val selectedScreen: Screen = Screen.Home,
+    val selectedScreen: Screen = Screen.Onboarding,
     val books: List<Book> = emptyList(),
     val selectedImageURI: Uri = Uri.parse(""),
     val selectedBook: Book? = null,

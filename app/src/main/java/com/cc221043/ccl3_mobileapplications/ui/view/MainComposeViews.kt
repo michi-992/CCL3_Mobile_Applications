@@ -84,12 +84,17 @@ import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.draw.shadow
 import com.cc221043.ccl3_mobileapplications.data.BookDao
+import com.cc221043.ccl3_mobileapplications.ui.view_model.OnboardingViewModel
+import kotlinx.coroutines.delay
 
 sealed class Screen(val route: String) {
     object Home : Screen("Home")
+    object Onboarding : Screen("Onboarding")
     object AddBook : Screen("AddBook")
     object EditBook : Screen("EditBook")
     object BookDetails : Screen("BookDetails")
@@ -98,16 +103,27 @@ sealed class Screen(val route: String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainView(
-    mainViewModel: MainViewModel, pickImageLauncher: ActivityResultLauncher<String>
+    mainViewModel: MainViewModel,
+    onboardingViewModel: OnboardingViewModel,
+    pickImageLauncher: ActivityResultLauncher<String>
 ) {
     val state = mainViewModel.mainViewState.collectAsState()
     val navController = rememberNavController()
+
+    observeOnboardingCompletion(onboardingViewModel, navController)
+    val onboardingCompleted by onboardingViewModel.onboardingCompleted.collectAsState()
+    if (onboardingCompleted) {
+        navController.navigate(Screen.Home.route)
+    }
+
 
     Scaffold(
         topBar = {
             when (state.value.selectedScreen) {
                 is Screen.Home -> {
                     HomeTopBar()
+                }
+                is Screen.Onboarding -> {
                 }
 
                 is Screen.AddBook -> {
@@ -126,9 +142,13 @@ fun MainView(
     ) {
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = if (onboardingCompleted) Screen.Home.route else Screen.Onboarding.route,
             modifier = Modifier.padding(it),
         ) {
+            composable(Screen.Onboarding.route) {
+                mainViewModel.selectedScreen(Screen.Onboarding)
+                OnboardingScreen(onboardingViewModel, navController)
+            }
             composable(Screen.Home.route) {
                 mainViewModel.selectedScreen(Screen.Home)
                 mainViewModel.getAllBooks()
@@ -163,6 +183,24 @@ fun MainView(
                     bookId,
                     onPickImage = { pickImageLauncher.launch("image/*") })
             }
+        }
+    }
+}
+
+@Composable
+private fun observeOnboardingCompletion(
+    onboardingViewModel: OnboardingViewModel,
+    navController: NavController
+) {
+    val onboardingCompleted by onboardingViewModel.onboardingCompleted.collectAsState()
+
+    if (onboardingCompleted) {
+        LaunchedEffect(navController) {
+            navController.navigate(Screen.Home.route)
+        }
+    } else {
+        LaunchedEffect(navController) {
+            navController.navigate(Screen.Onboarding.route)
         }
     }
 }
@@ -972,5 +1010,114 @@ fun EditBook(
                 Text(text = "Save Changes")
             }
         }
+    }
+}
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: NavController) {
+    DisposableEffect(Unit) {
+        onDispose {
+            onboardingViewModel.initializeData()
+        }
+    }
+
+    val pagerState = rememberPagerState { 4 }
+    var index by remember {
+        mutableIntStateOf(0)
+    }
+
+    LaunchedEffect(index) {
+        pagerState.animateScrollToPage(index)
+    }
+    LaunchedEffect(
+        pagerState.currentPage
+    ) {
+        index = pagerState.currentPage
+    }
+
+    HorizontalPager(
+        state = pagerState
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            when (index) {
+                0 -> {
+                    LoadingScreen()
+//                    Image(
+//                        painter = painterResource(id = R.drawable.bat_filled),
+//                        contentDescription = null,
+//                        colorFilter = ColorFilter.tint(Color.LightGray),
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .fillMaxHeight()
+//                    )
+                    LaunchedEffect(Unit) {
+                        delay(2000)
+                        index++
+                    }
+                }
+                1 -> {
+                    Text("Boom 1")
+                }
+                2 -> {
+                    Text("Boom 2")
+                }
+                3 -> {
+                    Text("Boom 3")
+                }
+            }
+
+            if (index != 0 && index != 3) {
+                Button(onClick = {
+                    onboardingViewModel.completeOnboarding()
+                    navController.navigate(Screen.Home.route)
+                }) {
+                    Text("Skip")
+                }
+            }
+
+            if (index != 0 && index != 1) {
+                Button(onClick = {
+                    index--
+                }) {
+                    Text("Back")
+                }
+            }
+
+            if (index != 0 && index != 3) {
+                Button(onClick = {
+                    index++
+                }) {
+                    Text("Next")
+                }
+            }
+
+            if (index == 3) {
+                Button(onClick = {
+                    onboardingViewModel.completeOnboarding()
+                    navController.navigate(Screen.Home.route)
+                }) {
+                    Text("Let's-a go!")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LoadingScreen() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Colors.Blue0),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(100.dp),
+            color = Colors.PrimaryBlue,
+            strokeWidth = 15.dp)
     }
 }

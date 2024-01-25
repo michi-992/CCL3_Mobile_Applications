@@ -25,8 +25,22 @@ import com.cc221043.ccl3_mobileapplications.data.BookDatabase
 import com.cc221043.ccl3_mobileapplications.ui.theme.CCL3MobileApplicationsTheme
 import com.cc221043.ccl3_mobileapplications.ui.view.MainView
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
+import com.cc221043.ccl3_mobileapplications.ui.view_model.OnboardingViewModel
 
 class MainActivity : ComponentActivity() {
+    private val onboardingDataStore: DataStore<Preferences> by preferencesDataStore(name = "onboarding_prefs")
+
+    private val onboardingViewModel by viewModels<OnboardingViewModel> {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return OnboardingViewModel(onboardingDataStore) as T
+            }
+        }
+    }
+
     private val db by lazy {
     Room.databaseBuilder(this, BookDatabase::class.java, "BookDatabase.db").build()
 }
@@ -62,7 +76,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainView(mainViewModel, pickImageLauncher)
+                    MainView(mainViewModel, onboardingViewModel, pickImageLauncher)
                 }
             }
         }

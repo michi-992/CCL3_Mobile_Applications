@@ -355,7 +355,7 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
         }
     }
 
-    val pagerState = rememberPagerState { 3 }
+    val pagerState = rememberPagerState { 4 }
     var index by remember {
         mutableIntStateOf(0)
     }
@@ -369,7 +369,9 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
         index = pagerState.currentPage
     }
 
-    HorizontalPager(state = pagerState) {
+    HorizontalPager(
+        state = pagerState
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -379,7 +381,7 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
                 0 -> {
                     Text(text = "")
                     LaunchedEffect(Unit) {
-                        delay(5000)
+                        delay(3000)
                         index++
                     }
                 }
@@ -394,7 +396,7 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
                 }
             }
 
-            if (index != 0) {
+            if (index != 0 && index != 3) {
                 Button(onClick = {
                     onboardingViewModel.completeOnboarding()
                     navController.navigate(Screen.Home.route)
@@ -403,19 +405,28 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
                 }
             }
 
-            if (index != 0) {
+            if (index != 0 && index != 1) {
                 Button(onClick = {
-//                when (navController.currentBackStackEntry?.destination?.route) {
-//                    Screen.Onboarding1.route -> navController.navigate(Screen.Onboarding2.route)
-//                    Screen.Onboarding2.route -> navController.navigate(Screen.Onboarding3.route)
-//                    Screen.Onboarding3.route -> {
-//                        onboardingViewModel.completeOnboarding()
-//                        navController.navigate(Screen.Home.route)
-//                    }
-//                }
+                    index--
+                }) {
+                    Text("Back")
+                }
+            }
+
+            if (index != 0 && index != 3) {
+                Button(onClick = {
                     index++
                 }) {
                     Text("Next")
+                }
+            }
+
+            if (index == 3) {
+                Button(onClick = {
+                    onboardingViewModel.completeOnboarding()
+                    navController.navigate(Screen.Home.route)
+                }) {
+                    Text("Let's-a go!")
                 }
             }
         }

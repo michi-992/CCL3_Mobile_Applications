@@ -2,10 +2,8 @@ package com.cc221043.ccl3_mobileapplications.ui.view
 
 import android.net.Uri
 import androidx.activity.result.ActivityResultLauncher
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -14,7 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,32 +25,24 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButtonElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -63,7 +52,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -77,12 +65,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -94,9 +81,7 @@ import com.cc221043.ccl3_mobileapplications.R
 import com.cc221043.ccl3_mobileapplications.data.model.Book
 import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
-import com.google.android.material.search.SearchBar
-import com.google.android.material.tabs.TabItem
-
+import androidx.compose.foundation.lazy.items
 
 sealed class Screen(val route: String) {
     object Home : Screen("Home")
@@ -119,14 +104,17 @@ fun MainView(
         topBar = {
             when (state.value.selectedScreen) {
                 is Screen.Home -> {
-                    HomeTopBar(mainViewModel, navController)
+                    HomeTopBar()
                 }
+
                 is Screen.AddBook -> {
                     AddBookTopBar(mainViewModel, navController)
                 }
+
                 is Screen.EditBook -> {
                     EditBookTopBar(mainViewModel, navController)
                 }
+
                 is Screen.BookDetails -> {
                     BookDetailsTopBar(mainViewModel, navController)
                 }
@@ -175,156 +163,11 @@ fun MainView(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AddBookTopBar(mainViewModel: MainViewModel, navController: NavController) {
-    val state = mainViewModel.mainViewState.collectAsState()
-    val iconButtonColors = rememberUpdatedState(
-        IconButtonDefaults.iconButtonColors(
-            contentColor = Colors.OffWhite,
-            containerColor = Colors.Blue0,
-            disabledContentColor = Colors.OffWhite,
-            disabledContainerColor = Colors.Blue0,
-        )
-    )
-    CenterAlignedTopAppBar(
-        navigationIcon = {
-            IconButton(
-                onClick = {
-                    if (state.value.previousScreen == Screen.AddBook.route || state.value.previousScreen == Screen.EditBook.route) {
-                        navController.navigate("Home")
-                        mainViewModel.previousScreen("")
-                    } else {
-                        navController.navigateUp()
-                    }
-                },
-                colors = iconButtonColors.value
-            ) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
-            }
-        },
-        title = {
-            Text(
-                text = "Add Book",
-                style = MaterialTheme.typography.titleSmall
-            )
-        },
-        scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    )
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun EditBookTopBar(mainViewModel: MainViewModel, navController: NavController) {
-    val state = mainViewModel.mainViewState.collectAsState()
-    val iconButtonColors = rememberUpdatedState(
-        IconButtonDefaults.iconButtonColors(
-            contentColor = Colors.OffWhite,
-            containerColor = Colors.Blue0,
-            disabledContentColor = Colors.OffWhite,
-            disabledContainerColor = Colors.Blue0,
-        )
-    )
-    CenterAlignedTopAppBar(
-        navigationIcon = {
-            IconButton(
-                onClick = {
-                    if (state.value.previousScreen == Screen.AddBook.route || state.value.previousScreen == Screen.EditBook.route) {
-                        navController.navigate("Home")
-                        mainViewModel.previousScreen("")
-                    } else {
-                        navController.navigateUp()
-                    }
-                },
-                colors = iconButtonColors.value
-            ) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
-            }
-        },
-        title = {
-            Text(
-                text = "Add Book",
-                style = MaterialTheme.typography.titleSmall
-            )
-        },
-        scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BookDetailsTopBar(mainViewModel: MainViewModel, navController: NavController) {
-    val state = mainViewModel.mainViewState.collectAsState()
-    val iconButtonColors = rememberUpdatedState(
-        IconButtonDefaults.iconButtonColors(
-            contentColor = Colors.OffWhite,
-            containerColor = Colors.Blue0,
-            disabledContentColor = Colors.OffWhite,
-            disabledContainerColor = Colors.Blue0,
-        )
-    )
-    CenterAlignedTopAppBar(
-        navigationIcon = {
-            IconButton(
-                onClick = {
-                    if (state.value.previousScreen == Screen.AddBook.route || state.value.previousScreen == Screen.EditBook.route) {
-                        navController.navigate("Home")
-                        mainViewModel.previousScreen("")
-                    } else {
-                        navController.navigateUp()
-                    }
-                },
-                colors = iconButtonColors.value
-            ) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
-            }
-        },
-        title = {
-            Text(
-                text = "Book Details",
-                style = MaterialTheme.typography.titleSmall
-            )
-        },
-        scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun HomeTopBar(mainViewModel: MainViewModel, navController: NavController) {
-    CenterAlignedTopAppBar(
-        title = {
-            Column {
-                Row {
-                    Icon(
-                        painter = painterResource(id = R.drawable.hanging_bat),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .height(46.dp)
-                            .width(42.dp),
-                        tint = Colors.Blue6
-                    )
-                    Spacer(modifier = Modifier.size(6.dp))
-                    Text(
-                        text = stringResource(id = R.string.app_name),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-            }
-        },
-        scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    )
-}
-
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
     val state = mainViewModel.mainViewState.collectAsState()
     val books = state.value.books
-    val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
-    var searchText by rememberSaveable { mutableStateOf("") }
 
     val buttonColors = ButtonDefaults.buttonColors(
         contentColor = Colors.OffWhite,
@@ -332,8 +175,6 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
         disabledContentColor = Colors.OffWhite,
         disabledContainerColor = Colors.Blue0,
     )
-
-
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
@@ -354,12 +195,10 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
             LaunchedEffect(tabIndex) {
                 pagerState.animateScrollToPage(tabIndex)
             }
-            LaunchedEffect(pagerState.currentPage,
-//                pagerState.isScrollInProgress
+            LaunchedEffect(
+                pagerState.currentPage,
             ) {
-//                if(!pagerState.isScrollInProgress) {
-                    tabIndex = pagerState.currentPage
-//                }
+                tabIndex = pagerState.currentPage
             }
 
             TabRow(
@@ -389,164 +228,65 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
                 )
             }
             when (tabIndex) {
-            0 -> {
-                if(flag) {
-                    mainViewModel.getAllBooks()
-                    flag = false
+                0 -> {
+                    if (flag) {
+                        mainViewModel.getAllBooks()
+                        flag = false
+                    }
+                }
+
+                1 -> {
+                    if (flag2) {
+                        mainViewModel.getAllBooks()
+                        flag2 = false
+//                        searchText = ""
+                    }
                 }
             }
-            1 -> {
-                if(flag2) {
-                    mainViewModel.getAllBooks()
-                    flag2 = false
-                    searchText = ""
-                }
-            } }
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-            ) {index ->
-                Box(modifier = Modifier.fillMaxSize()
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                brush = Brush.verticalGradient(
-                                    colors = gradientColors,
+            ) { index ->
+                when (index) {
+                    0 -> {
+                        val genreArray = stringArrayResource(id = R.array.genres)
+                        var selectedNames by remember { mutableStateOf(emptyList<String>()) }
+                        //HomeScreenAllBooks(books, navController, mainViewModel)
+                        LazyColumn {
+                            items(genreArray) { name ->
+                                GenreButton(
+                                    name = name,
+                                    isSelected = selectedNames.contains(name),
+                                    onNameClicked = {
+                                        selectedNames = if (selectedNames.contains(name)) {
+                                            selectedNames - name
+                                        } else {
+                                            selectedNames + name
+                                        }
+                                        println(selectedNames)
+                                    }
                                 )
-                            )
-                            .padding(start = 14.dp, end = 14.dp, top = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        if (tabIndex == 0) {
-                            TextField(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .horizontalScroll(rememberScrollState()),
-                                value = searchText,
-                                onValueChange = {
-                                    searchText = it
-                                    mainViewModel.getBooksByQuery(searchText)
-                                },
-                                placeholder = { Text("Search") },
-                                leadingIcon = {
-                                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
-                                },
-                                trailingIcon = {
-                                    if (searchText.isNotEmpty()) {
-                                        IconButton(
-                                            onClick = {
-                                                searchText = ""
-                                                mainViewModel.getAllBooks()
-                                            }
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Clear,
-                                                contentDescription = null
-                                            )
-                                        }
-                                    }
-                                },
-                                keyboardOptions = KeyboardOptions.Default.copy(
-                                    imeAction = ImeAction.Search
-                                ),
-                                keyboardActions = KeyboardActions(
-                                    onSearch = {
-                                        mainViewModel.getBooksByQuery(searchText)
-                                    }
-                                ),
-                            )
-
-                            LazyVerticalGrid(
-                                modifier = Modifier
-                                    .heightIn(min = 200.dp)
-                                    .padding(top = 14.dp)
-                                    .weight(1f)
-                                    .fillMaxWidth(1f),
-                                verticalArrangement = Arrangement.spacedBy(16.dp),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                columns = GridCells.Fixed(3),
-                                content = {
-                                    items(books.size) {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(154.dp)
-
-                                                .clickable {
-                                                    navController.navigate("${Screen.BookDetails.route}/${books[it].id}")
-                                                }
-                                        ) {
-                                            AsyncImage(
-                                                modifier = Modifier.clip(RoundedCornerShape(4.dp)),
-                                                model = books[it].cover,
-                                                contentDescription = null,
-                                                contentScale = ContentScale.Crop
-                                            )
-                                        }
-                                    }
-                                    items(3) {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth(3.0f)
-                                                .height(100.dp)
-                                        )
-                                    }
-                                })
-                        } else {
-                            LazyVerticalGrid(
-                                modifier = Modifier
-                                    .heightIn(min = 200.dp)
-                                    .padding(top = 14.dp)
-                                    .weight(1f)
-                                    .fillMaxWidth(1f),
-                                verticalArrangement = Arrangement.spacedBy(16.dp),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                columns = GridCells.Fixed(3),
-                                content = {
-                                    items(books.size) {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(154.dp)
-
-                                                .clickable {
-                                                    navController.navigate("${Screen.BookDetails.route}/${books[it].id}")
-                                                }
-                                        ) {
-                                            AsyncImage(
-                                                modifier = Modifier.clip(RoundedCornerShape(4.dp)),
-                                                model = books[it].cover,
-                                                contentDescription = null,
-                                                contentScale = ContentScale.Crop
-                                            )
-                                        }
-                                    }
-                                    items(3) {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth(3.0f)
-                                                .height(100.dp)
-                                        )
-                                    }
-                                })
+                            }
                         }
+                    }
+
+                    1 -> {
+                        HomeScreenGenres(books, navController, mainViewModel)
                     }
                 }
             }
         }
         Button(
-            onClick = { navController.navigate("AddBook") },
-            shape = RoundedCornerShape(8.dp),
-            colors = buttonColors,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 10.dp)
-                .background(color = Colors.Blue1, shape = RoundedCornerShape(12.dp))
-                .padding(vertical = 10.dp, horizontal = 12.dp)
+                onClick = { navController.navigate("AddBook") },
+        shape = RoundedCornerShape(8.dp),
+        colors = buttonColors,
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .padding(bottom = 10.dp)
+            .background(color = Colors.Blue1, shape = RoundedCornerShape(12.dp))
+            .padding(vertical = 10.dp, horizontal = 12.dp)
 
         ) {
             Row(
@@ -557,6 +297,137 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
                 Spacer(modifier = Modifier.size(6.dp))
                 Text(text = "Add Book", style = MaterialTheme.typography.bodyLarge)
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeScreenAllBooks(books: List<Book>, navController: NavController, mainViewModel: MainViewModel) {
+    val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
+    var searchText by rememberSaveable { mutableStateOf("") }
+
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = gradientColors,
+                    )
+                )
+                .padding(start = 14.dp, end = 14.dp, top = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                value = searchText,
+                onValueChange = {
+                    searchText = it
+                    mainViewModel.getBooksByQuery(searchText)
+                },
+                placeholder = { Text("Search") },
+                leadingIcon = {
+                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                },
+                trailingIcon = {
+                    if (searchText.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                searchText = ""
+                                mainViewModel.getAllBooks()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = null
+                            )
+                        }
+                    }
+                },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Search
+                ),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        mainViewModel.getBooksByQuery(searchText)
+                    }
+                ),
+            )
+
+            BookGrid(mainViewModel, navController, books)
+        }
+    }
+}
+
+@Composable
+fun BookGrid(mainViewModel: MainViewModel, navController: NavController, books: List<Book>) {
+    Column (modifier = Modifier.fillMaxSize()) {
+        LazyVerticalGrid(
+            modifier = Modifier
+                .heightIn(min = 200.dp)
+                .padding(top = 14.dp)
+                .weight(1f)
+                .fillMaxWidth(1f),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            columns = GridCells.Fixed(3),
+            content = {
+                items(books.size) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(154.dp)
+
+                            .clickable {
+                                navController.navigate("${Screen.BookDetails.route}/${books[it].id}")
+                            }
+                    ) {
+                        AsyncImage(
+                            modifier = Modifier.clip(RoundedCornerShape(4.dp)),
+                            model = books[it].cover,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+                items(3) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(3.0f)
+                            .height(100.dp)
+                    )
+                }
+            })
+    }
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeScreenGenres(books: List<Book>, navController: NavController, mainViewModel: MainViewModel) {
+    val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
+
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = gradientColors,
+                    )
+                )
+                .padding(start = 14.dp, end = 14.dp, top = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            val genres =
+            BookGrid(mainViewModel, navController, books)
         }
     }
 }

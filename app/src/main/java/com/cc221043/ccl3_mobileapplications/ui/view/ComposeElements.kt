@@ -15,8 +15,7 @@ fun GenreButton(name: String, isSelected: Boolean, onNameClicked: () -> Unit) {
     Button(
         onClick = onNameClicked,
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
+            .padding(horizontal = 4.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = if (isSelected) Color.Green else Color.Gray,
         )

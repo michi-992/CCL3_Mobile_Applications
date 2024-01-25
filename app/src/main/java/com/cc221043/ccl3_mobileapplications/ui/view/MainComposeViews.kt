@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.pager.HorizontalPager
@@ -85,8 +86,6 @@ import androidx.compose.foundation.lazy.items
 
 sealed class Screen(val route: String) {
     object Home : Screen("Home")
-
-    //    object HomeGenres : Screen("HomeGenres")
     object AddBook : Screen("AddBook")
     object EditBook : Screen("EditBook")
     object BookDetails : Screen("BookDetails")
@@ -129,6 +128,7 @@ fun MainView(
             composable(Screen.Home.route) {
                 mainViewModel.selectedScreen(Screen.Home)
                 mainViewModel.getAllBooks()
+                mainViewModel.getAllBooksForGenres()
                 HomeScreen(mainViewModel, navController)
             }
             composable(Screen.AddBook.route) {
@@ -168,6 +168,7 @@ fun MainView(
 fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
     val state = mainViewModel.mainViewState.collectAsState()
     val books = state.value.books
+    val booksForGenres = state.value.booksForGenres
 
     val buttonColors = ButtonDefaults.buttonColors(
         contentColor = Colors.OffWhite,
@@ -251,29 +252,11 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
             ) { index ->
                 when (index) {
                     0 -> {
-                        val genreArray = stringArrayResource(id = R.array.genres)
-                        var selectedNames by remember { mutableStateOf(emptyList<String>()) }
-                        //HomeScreenAllBooks(books, navController, mainViewModel)
-                        LazyColumn {
-                            items(genreArray) { name ->
-                                GenreButton(
-                                    name = name,
-                                    isSelected = selectedNames.contains(name),
-                                    onNameClicked = {
-                                        selectedNames = if (selectedNames.contains(name)) {
-                                            selectedNames - name
-                                        } else {
-                                            selectedNames + name
-                                        }
-                                        println(selectedNames)
-                                    }
-                                )
-                            }
-                        }
+                        HomeScreenAllBooks(books, navController, mainViewModel)
                     }
 
                     1 -> {
-                        HomeScreenGenres(books, navController, mainViewModel)
+                        HomeScreenGenres(booksForGenres, navController, mainViewModel)
                     }
                 }
             }
@@ -358,7 +341,6 @@ fun HomeScreenAllBooks(books: List<Book>, navController: NavController, mainView
                     }
                 ),
             )
-
             BookGrid(mainViewModel, navController, books)
         }
     }
@@ -407,10 +389,11 @@ fun BookGrid(mainViewModel: MainViewModel, navController: NavController, books: 
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenGenres(books: List<Book>, navController: NavController, mainViewModel: MainViewModel) {
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
+    val genreArray = stringArrayResource(id = R.array.genres)
+    var selectedNames by remember { mutableStateOf(emptyList<String>()) }
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -426,7 +409,22 @@ fun HomeScreenGenres(books: List<Book>, navController: NavController, mainViewMo
                 .padding(start = 14.dp, end = 14.dp, top = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val genres =
+            LazyRow {
+                items(genreArray) { name ->
+                    GenreButton(
+                        name = name,
+                        isSelected = selectedNames.contains(name),
+                        onNameClicked = {
+                            selectedNames = if (selectedNames.contains(name)) {
+                                selectedNames - name
+                            } else {
+                                selectedNames + name
+                            }
+                            println(selectedNames)
+                        }
+                    )
+                }
+            }
             BookGrid(mainViewModel, navController, books)
         }
     }

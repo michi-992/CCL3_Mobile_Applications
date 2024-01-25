@@ -18,8 +18,7 @@ import java.io.File
 
 class MainViewModel(
     private val dao: BookDao,
-    private val mainActivity: MainActivity,
-    onboardingViewModel: OnboardingViewModel
+    private val mainActivity: MainActivity
 ) : ViewModel() {
 
     private val _mainViewState = MutableStateFlow(MainViewState())

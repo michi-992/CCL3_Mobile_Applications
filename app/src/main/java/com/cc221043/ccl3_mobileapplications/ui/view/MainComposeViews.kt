@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,12 +46,14 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -74,6 +77,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -379,9 +383,17 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
         ) {
             when (index) {
                 0 -> {
-                    Text(text = "")
+                    LoadingScreen()
+//                    Image(
+//                        painter = painterResource(id = R.drawable.bat_filled),
+//                        contentDescription = null,
+//                        colorFilter = ColorFilter.tint(Color.LightGray),
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .fillMaxHeight()
+//                    )
                     LaunchedEffect(Unit) {
-                        delay(3000)
+                        delay(2000)
                         index++
                     }
                 }
@@ -433,6 +445,20 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
     }
 }
 
+@Composable
+fun LoadingScreen() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Colors.Blue0),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(100.dp),
+            color = Colors.PrimaryBlue,
+            strokeWidth = 15.dp)
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable

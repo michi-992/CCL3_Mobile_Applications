@@ -1,11 +1,12 @@
 package com.cc221043.ccl3_mobileapplications.ui.view
 
 import android.net.Uri
+import android.util.Log
+import android.widget.RatingBar
 import androidx.activity.result.ActivityResultLauncher
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,13 +22,12 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -42,18 +41,13 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButtonElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -65,6 +59,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -77,14 +72,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.State
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -94,13 +90,12 @@ import com.cc221043.ccl3_mobileapplications.R
 import com.cc221043.ccl3_mobileapplications.data.model.Book
 import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
-import com.google.android.material.search.SearchBar
-import com.google.android.material.tabs.TabItem
+import com.cc221043.ccl3_mobileapplications.ui.view_model.OnboardingViewModel
 
 
 sealed class Screen(val route: String) {
     object Home : Screen("Home")
-
+    object Onboarding : Screen("Onboarding")
     //    object HomeGenres : Screen("HomeGenres")
     object AddBook : Screen("AddBook")
     object EditBook : Screen("EditBook")
@@ -110,16 +105,26 @@ sealed class Screen(val route: String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainView(
-    mainViewModel: MainViewModel, pickImageLauncher: ActivityResultLauncher<String>
+    mainViewModel: MainViewModel, onboardingViewModel: OnboardingViewModel, pickImageLauncher: ActivityResultLauncher<String>
 ) {
     val state = mainViewModel.mainViewState.collectAsState()
     val navController = rememberNavController()
+
+    observeOnboardingCompletion(onboardingViewModel, navController)
+
+    val onboardingCompleted by onboardingViewModel.onboardingCompleted.collectAsState()
+    if (onboardingCompleted) {
+        navController.navigate(Screen.Home.route)
+    }
 
     Scaffold(
         topBar = {
             when (state.value.selectedScreen) {
                 is Screen.Home -> {
                     HomeTopBar(mainViewModel, navController)
+                }
+                is Screen.Onboarding -> {
+
                 }
                 is Screen.AddBook -> {
                     AddBookTopBar(mainViewModel, navController)
@@ -135,13 +140,16 @@ fun MainView(
     ) {
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = if (onboardingCompleted) Screen.Home.route else Screen.Onboarding.route,
             modifier = Modifier.padding(it),
         ) {
             composable(Screen.Home.route) {
                 mainViewModel.selectedScreen(Screen.Home)
                 mainViewModel.getAllBooks()
                 HomeScreen(mainViewModel, navController)
+            }
+            composable(Screen.Onboarding.route) {
+                OnboardingScreen(onboardingViewModel, navController)
             }
             composable(Screen.AddBook.route) {
                 mainViewModel.selectedScreen(Screen.AddBook)
@@ -171,6 +179,24 @@ fun MainView(
                     bookId,
                     onPickImage = { pickImageLauncher.launch("image/*") })
             }
+        }
+    }
+}
+
+@Composable
+private fun observeOnboardingCompletion(
+    onboardingViewModel: OnboardingViewModel,
+    navController: NavController
+) {
+    val onboardingCompleted by onboardingViewModel.onboardingCompleted.collectAsState()
+
+    if (onboardingCompleted) {
+        LaunchedEffect(navController) {
+            navController.navigate(Screen.Home.route)
+        }
+    } else {
+        LaunchedEffect(navController) {
+            navController.navigate(Screen.Onboarding.route)
         }
     }
 }
@@ -317,6 +343,200 @@ fun HomeTopBar(mainViewModel: MainViewModel, navController: NavController) {
     )
 }
 
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: NavController) {
+    DisposableEffect(Unit) {
+        onDispose {
+            onboardingViewModel.initializeData()
+        }
+    }
+
+    val pagerState = rememberPagerState { 3 }
+    var index by remember {
+        mutableIntStateOf(0)
+    }
+
+    LaunchedEffect(index) {
+        pagerState.animateScrollToPage(index)
+    }
+    LaunchedEffect(
+        pagerState.currentPage
+    ) {
+        index = pagerState.currentPage
+    }
+
+    HorizontalPager(state = pagerState) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            when (index) {
+                0 -> {
+                    Text(text = "Boom")
+                }
+                1 -> {
+                    Text("Boom 2")
+                }
+                2 -> {
+                    Text("Boom 3")
+                }
+            }
+
+            // Buttons associated with each onboarding screen
+            Button(onClick = {
+                onboardingViewModel.completeOnboarding()
+                navController.navigate(Screen.Home.route)
+            }) {
+                Text("Skip")
+            }
+
+            Button(onClick = {
+//                when (navController.currentBackStackEntry?.destination?.route) {
+//                    Screen.Onboarding1.route -> navController.navigate(Screen.Onboarding2.route)
+//                    Screen.Onboarding2.route -> navController.navigate(Screen.Onboarding3.route)
+//                    Screen.Onboarding3.route -> {
+//                        onboardingViewModel.completeOnboarding()
+//                        navController.navigate(Screen.Home.route)
+//                    }
+//                }
+                index++
+            }) {
+                Text("Next")
+            }
+        }
+    }
+}
+
+//    when (currentScreen) {
+//        Screen.Onboarding1 -> {
+//            Image(
+//                painter = painterResource(id = R.drawable.bat_filled),
+//                contentDescription = null,
+//                modifier = Modifier.fillMaxWidth().height(200.dp)
+//            )
+//            Text("Onboarding 1")
+//            Text("Onboarding 1 Description")
+//        }
+//        Screen.Onboarding2 -> {
+//            Image(
+//                painter = painterResource(id = R.drawable.battybatbat),
+//                contentDescription = null,
+//                modifier = Modifier.fillMaxWidth().height(200.dp)
+//            )
+//            Text("Onboarding 2")
+//            Text("Onboarding 2 Description")
+//        }
+//        Screen.Onboarding3 -> {
+//            Image(
+//                painter = painterResource(id = R.drawable.bat_filled),
+//                contentDescription = null,
+//                modifier = Modifier.fillMaxWidth().height(200.dp)
+//            )
+//            Text("Onboarding 3")
+//            Text("Onboarding 3 Description")
+//        } else -> {
+//            Text("")
+//        }
+//    }
+//
+//    Button(onClick = {
+//        onboardingViewModel.completeOnboarding()
+//        navController.navigate(Screen.Home.route)
+//    }) {
+//        Text("Skip")
+//    }
+//
+//    Button(onClick = {
+//        when (navController.currentBackStackEntry?.destination?.route) {
+//            Screen.Onboarding1.route -> navController.navigate(Screen.Onboarding2.route)
+//            Screen.Onboarding2.route -> navController.navigate(Screen.Onboarding3.route)
+//            Screen.Onboarding3.route -> {
+//                onboardingViewModel.completeOnboarding()
+//                navController.navigate(Screen.Home.route)
+//            }
+//        }
+//    }) {
+//        Text("Next")
+//    }
+
+
+//@OptIn(ExperimentalFoundationApi::class)
+//@Composable
+//fun OnboardingViewPager(
+//    onboardingPages: List<OnboardingPage>,
+//    onboardingViewModel: OnboardingViewModel,
+//    navController: NavController
+//) {
+//    val pagerState = rememberPagerState { 5 }
+//
+//    HorizontalPager(
+//        state = pagerState,
+//        modifier = Modifier.fillMaxSize()
+//    ) { page ->
+//        OnboardingPageContent(onboardingPage = onboardingPages[page])
+//
+//        // Last onboarding page
+//        if (page == onboardingPages.size - 1) {
+//            Button(
+//                onClick = {
+//                    onboardingViewModel.completeOnboarding()
+//                    navController.navigate(Screen.Home.route)
+//                },
+//                modifier = Modifier
+//                    .padding(16.dp)
+//                    .fillMaxWidth()
+//            ) {
+//                Text("Get Started")
+//            }
+//        }
+//    }
+//}
+//
+//@Composable
+//fun OnboardingPageContent(onboardingPage: OnboardingPage) {
+//    Column(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .padding(16.dp),
+//        horizontalAlignment = Alignment.CenterHorizontally,
+//        verticalArrangement = Arrangement.Center
+//    ) {
+//        // Display onboarding image
+//        Image(
+//            painter = painterResource(id = onboardingPage.image),
+//            contentDescription = null,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .height(200.dp)
+//                .clip(shape = RoundedCornerShape(8.dp)),
+//            contentScale = ContentScale.Crop
+//        )
+//
+//        Spacer(modifier = Modifier.height(16.dp))
+//
+//        Text(
+//            text = onboardingPage.title,
+//            style = MaterialTheme.typography.titleLarge
+//        )
+//
+//        Spacer(modifier = Modifier.height(8.dp))
+//
+//        Text(
+//            text = onboardingPage.description,
+//            style = MaterialTheme.typography.bodyMedium,
+//            textAlign = TextAlign.Center
+//        )
+//    }
+//}
+//
+//data class OnboardingPage(
+//    val title: String,
+//    val description: String,
+//    val image: Int
+//)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -819,6 +1039,7 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
             DropdownMenuItem(
                 onClick = {
                     isMenuExpanded = false
+                    Log.d("BookDetails", "Navigating to EditBook: $bookId")
                     navController.navigate("${Screen.EditBook.route}/$bookId")
                 },
                 text = { Text("Edit") },

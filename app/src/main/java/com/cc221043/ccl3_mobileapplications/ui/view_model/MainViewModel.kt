@@ -1,29 +1,27 @@
 package com.cc221043.ccl3_mobileapplications.ui.view_model
 
 import android.net.Uri
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cc221043.ccl3_mobileapplications.MainActivity
 import com.cc221043.ccl3_mobileapplications.data.BookDao
+//import com.cc221043.ccl3_mobileapplications.data.datastore.MyPreferencesDataStore
 import com.cc221043.ccl3_mobileapplications.data.model.Book
 import com.cc221043.ccl3_mobileapplications.ui.view.Screen
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
 
-class MainViewModel (private val dao: BookDao, private val mainActivity: MainActivity) : ViewModel() {
+class MainViewModel(
+    private val dao: BookDao,
+    private val mainActivity: MainActivity,
+    onboardingViewModel: OnboardingViewModel
+) : ViewModel() {
+
     private val _mainViewState = MutableStateFlow(MainViewState())
     val mainViewState: StateFlow<MainViewState> = _mainViewState.asStateFlow()
 

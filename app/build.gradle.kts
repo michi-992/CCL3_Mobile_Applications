@@ -64,6 +64,7 @@ dependencies {
     // room database
     implementation("androidx.room:room-ktx:2.5.2")
     implementation("androidx.navigation:navigation-runtime-ktx:2.7.6")
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
     ksp("androidx.room:room-compiler:2.5.0")
 
     implementation("androidx.appcompat:appcompat:1.6.1")

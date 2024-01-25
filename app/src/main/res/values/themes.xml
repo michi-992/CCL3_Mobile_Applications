@@ -2,6 +2,6 @@
 <resources>
     <style name="Theme.CCL3MobileApplications" parent="android:Theme.Material.Light.NoActionBar">
         <!--        <item name="android:windowBackground">@color/blue1</item>-->
-                <item name="android:windowBackground">@color/blue1</item>
+                <item name="android:windowBackground">@color/blue0</item>
     </style>
 </resources>

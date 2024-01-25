@@ -5,29 +5,32 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
 import com.cc221043.ccl3_mobileapplications.data.BookDatabase
 import com.cc221043.ccl3_mobileapplications.ui.theme.CCL3MobileApplicationsTheme
 import com.cc221043.ccl3_mobileapplications.ui.view.MainView
-import com.cc221043.ccl3_mobileapplications.ui.view.Screen
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
-import com.cc221043.ccl3_mobileapplications.ui.view_model.OnboardingViewModel
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-
+import com.cc221043.ccl3_mobileapplications.ui.view_model.OnboardingViewModel
 
 class MainActivity : ComponentActivity() {
-
     private val onboardingDataStore: DataStore<Preferences> by preferencesDataStore(name = "onboarding_prefs")
 
     private val onboardingViewModel by viewModels<OnboardingViewModel> {
@@ -62,9 +65,11 @@ class MainActivity : ComponentActivity() {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Handle the splash screen transition.
+//        installSplashScreen()
+
         super.onCreate(savedInstanceState)
         setContent {
-
             CCL3MobileApplicationsTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(

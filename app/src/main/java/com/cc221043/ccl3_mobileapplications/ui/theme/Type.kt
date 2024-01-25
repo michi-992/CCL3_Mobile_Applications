@@ -23,7 +23,7 @@ val Typography = Typography(
         fontSize = 32.sp,
         lineHeight = 56.sp,
         letterSpacing = 0.5.sp,
-        color = Colors.OffWhite
+        color = Colors.Blue6
     ),
     titleSmall = TextStyle (
         fontFamily = FontFamily(Font(R.font.inter)),

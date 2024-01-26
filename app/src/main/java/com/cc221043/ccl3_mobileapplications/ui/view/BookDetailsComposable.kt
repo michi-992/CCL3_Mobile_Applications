@@ -15,10 +15,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -59,7 +63,9 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -192,35 +198,49 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
 
 
         Spacer(modifier = Modifier.height(16.dp))
-        IconButton(
-            onClick = { isMenuExpanded = !isMenuExpanded },
-        ) {
-            Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null, tint = Colors.OffWhite)
+        Row{
+            IconButton(
+                onClick = { navController.navigate("${Screen.EditBook.route}/$bookId") },
+            ) {
+                Icon(imageVector = Icons.Default.Edit, contentDescription = null, tint = Colors.OffWhite)
+            }
+            Spacer(modifier = Modifier.size(34.dp))
+            IconButton(
+                onClick = { showDeleteDialog = true },
+            ) {
+                Icon(imageVector = Icons.Default.Delete, contentDescription = null, tint = Colors.OffWhite)
+            }
         }
-        DropdownMenu(
-            expanded = isMenuExpanded,
-            onDismissRequest = { isMenuExpanded = false },
-            modifier = Modifier
-                .width(IntrinsicSize.Max)
-        ) {
-            DropdownMenuItem(
-                onClick = {
-                    isMenuExpanded = false
-                    navController.navigate("${Screen.EditBook.route}/$bookId")
-                },
-                text = { Text("Edit") },
-                enabled = true
-            )
 
-            DropdownMenuItem(
-                onClick = {
-                    isMenuExpanded = false
-                    showDeleteDialog = true
-                },
-                text = { Text("Delete") },
-                enabled = true
-            )
-        }
+//        IconButton(
+//            onClick = { isMenuExpanded = !isMenuExpanded },
+//        ) {
+//            Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null, tint = Colors.OffWhite)
+//        }
+//        DropdownMenu(
+//            expanded = isMenuExpanded,
+//            onDismissRequest = { isMenuExpanded = false },
+//            modifier = Modifier
+//                .width(IntrinsicSize.Max)
+//        ) {
+//            DropdownMenuItem(
+//                onClick = {
+//                    isMenuExpanded = false
+//                    navController.navigate("${Screen.EditBook.route}/$bookId")
+//                },
+//                text = { Text("Edit") },
+//                enabled = true
+//            )
+//
+//            DropdownMenuItem(
+//                onClick = {
+//                    isMenuExpanded = false
+//                    showDeleteDialog = true
+//                },
+//                text = { Text("Delete") },
+//                enabled = true
+//            )
+//        }
     }
 
     if (showDeleteDialog) {

@@ -97,6 +97,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
 import com.cc221043.ccl3_mobileapplications.data.BookDao
@@ -315,11 +316,14 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavController) {
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
     val state = mainViewModel.mainViewState.collectAsState()
-    val books = if(state.value.searchedBooks.isEmpty()) state.value.books else state.value.searchedBooks
+    var searchText by rememberSaveable { mutableStateOf("") }
+
+    val books = if(searchText == "") state.value.books else state.value.searchedBooks
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -334,7 +338,61 @@ fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavControlle
                 ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            SearchBar(mainViewModel)
+            TextField(
+                textStyle = MaterialTheme.typography.bodySmall,
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp, end = 14.dp, start = 14.dp)
+                    .shadow(shape = CircleShape, elevation = 6.dp)
+                    .border(BorderStroke(2.dp, color = Colors.Blue4), shape = CircleShape),
+                colors = TextFieldDefaults.textFieldColors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    containerColor = Colors.Blue1,
+                    focusedLeadingIconColor = Colors.OffWhite,
+                    textColor = Colors.OffWhite,
+                    unfocusedLeadingIconColor = Colors.Blue5,
+                    focusedTrailingIconColor = Colors.OffWhite,
+                    placeholderColor = Colors.Blue5
+                ),
+                shape = CircleShape,
+                value = searchText,
+                onValueChange = {
+                    searchText = it
+                    mainViewModel.getBooksBySearch(searchText)
+                },
+                placeholder = { Text("Search") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null
+                    )
+                },
+                trailingIcon = {
+                    if (searchText.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                searchText = ""
+                                mainViewModel.resetSearch()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = null
+                            )
+                        }
+                    }
+                },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Search
+                ),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        mainViewModel.getBooksBySearch(searchText)
+                    }
+                ),
+            )
             BookGrid(navController, books)
         }
     }

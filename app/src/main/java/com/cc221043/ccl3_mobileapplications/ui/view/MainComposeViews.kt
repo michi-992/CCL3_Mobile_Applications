@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -384,124 +385,6 @@ fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel)
     }
 }
 
-
-@Composable
-fun BookDetails(mainViewModel: MainViewModel, navController: NavController, bookId: Int) {
-    val state = mainViewModel.mainViewState.collectAsState()
-    val book = state.value.selectedBook ?: return
-
-    var isMenuExpanded by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        AsyncImage(
-            model = book.cover,
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .clip(shape = RoundedCornerShape(8.dp))
-                .background(Color.Gray)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(text = "Title: ${book.title}", style = MaterialTheme.typography.displayMedium)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Author: ${book.author}", style = MaterialTheme.typography.displayMedium)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Platform/Format: ${book.platformat}",
-            style = MaterialTheme.typography.displayMedium
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Synopsis: ${book.synopsis}", style = MaterialTheme.typography.displayMedium)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Status: ${book.status}", style = MaterialTheme.typography.displayMedium)
-        Spacer(modifier = Modifier.height(8.dp))
-        if (book.rating != 0 && book.status == "Finished") {
-            RatingBar(rating = book.rating, onRatingChanged = {}, small = true)
-        }
-
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                if (bookId != null) {
-                    navController.navigate(Screen.Home.route)
-                    mainViewModel.selectBookDetails(bookId)
-                } else {
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-        ) {
-            Text(text = "Back to Home")
-        }
-
-        IconButton(
-            onClick = { isMenuExpanded = !isMenuExpanded },
-        ) {
-            Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
-        }
-
-        DropdownMenu(
-            expanded = isMenuExpanded,
-            onDismissRequest = { isMenuExpanded = false },
-            modifier = Modifier
-                .width(IntrinsicSize.Max)
-        ) {
-            DropdownMenuItem(
-                onClick = {
-                    isMenuExpanded = false
-                    navController.navigate("${Screen.EditBook.route}/$bookId")
-                },
-                text = { Text("Edit") },
-                enabled = true
-            )
-
-            DropdownMenuItem(
-                onClick = {
-                    isMenuExpanded = false
-                    showDeleteDialog = true
-                },
-                text = { Text("Delete") },
-                enabled = true
-            )
-        }
-    }
-
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Book") },
-            text = { Text("Are you sure you want to delete this book?") },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showDeleteDialog = false
-                        mainViewModel.deleteBook(book)
-                        navController.navigate(Screen.Home.route)
-                    }
-                ) {
-                    Text("Delete")
-                }
-            },
-            dismissButton = {
-                Button(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-}
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: NavController) {
@@ -511,7 +394,22 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
         }
     }
 
-    val pagerState = rememberPagerState { 4 }
+    val buttonColors = ButtonDefaults.buttonColors(
+        contentColor = Colors.OffWhite,
+        containerColor = Colors.PrimaryBlueDark,
+        disabledContentColor = Colors.OffWhite,
+        disabledContainerColor = Colors.Blue0,
+    )
+
+    val buttonColorsSecondary = ButtonDefaults.buttonColors(
+        contentColor = Colors.OffWhite,
+        containerColor = Color.Transparent,
+//        borderColor = Colors.PrimaryBlueDark,
+        disabledContentColor = Colors.OffWhite,
+        disabledContainerColor = Colors.Blue0,
+    )
+
+    val pagerState = rememberPagerState { 5 }
     var index by remember {
         mutableIntStateOf(0)
     }
@@ -536,61 +434,179 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
             when (index) {
                 0 -> {
                     LoadingScreen()
-//                    Image(
-//                        painter = painterResource(id = R.drawable.bat_filled),
-//                        contentDescription = null,
-//                        colorFilter = ColorFilter.tint(Color.LightGray),
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .fillMaxHeight()
-//                    )
                     LaunchedEffect(Unit) {
                         delay(2000)
                         index++
                     }
                 }
                 1 -> {
-                    Text("Boom 1")
+                    Image(
+                        painter = painterResource(id = R.drawable.barry_happy),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp)
+                    )
+                    Text("Hello! I'm Barry the BiblioBat.",
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth()
+                    )
+                    Text("I'll help you keep track of all your reads.",
+                        style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth()
+                    )
+
                 }
                 2 -> {
-                    Text("Boom 2")
+                    Image(
+                        painter = painterResource(id = R.drawable.onboarding_one),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp)
+                    )
+                    Text("Easily find your books",
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth()
+                    )
+                    Text("You can search for a specific book you've added and view its details.",
+                        style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth()
+                    )
+
                 }
                 3 -> {
-                    Text("Boom 3")
+                    Image(
+                        painter = painterResource(id = R.drawable.onboarding_two),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp)
+                    )
+                    Text("Keep track of your books",
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth()
+                    )
+                    Text("Organize your books for an easy overview of all your reads.",
+                        style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth()
+                    )
+
+                }
+                4 -> {
+                    Image(
+                        painter = painterResource(id = R.drawable.onboarding_three),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp)
+                    )
+                    Text("Track your status & rate your reads",
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth()
+                    )
+                    Text("Update your reading status and rate your book to keep up with your reading journey!",
+                        style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth()
+                    )
+
                 }
             }
 
-            if (index != 0 && index != 3) {
-                Button(onClick = {
-                    onboardingViewModel.completeOnboarding()
-                    navController.navigate(Screen.Home.route)
-                }) {
-                    Text("Skip")
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                if (index != 0 && index != 4) {
+                    Button(onClick = {
+                        onboardingViewModel.completeOnboarding()
+                        navController.navigate(Screen.Home.route)
+                    },
+                        colors = buttonColorsSecondary,
+                        modifier = Modifier
+                            .border(
+                                width = 1.dp,
+                                color = Colors.PrimaryBlueDark,
+                                shape = CircleShape
+                            )
+                    ) {
+                        Text("Skip")
+                    }
                 }
-            }
 
-            if (index != 0 && index != 1) {
-                Button(onClick = {
-                    index--
-                }) {
-                    Text("Back")
+                Spacer(
+                    Modifier.padding(10.dp)
+                )
+
+                if (index != 0 && index != 1) {
+                    Button(onClick = {
+                        index--
+                    },
+                        colors = buttonColorsSecondary,
+                        modifier = Modifier
+                            .border(
+                                width = 1.dp,
+                                color = Colors.PrimaryBlueDark,
+                                shape = CircleShape
+                            )
+                    )  {
+                        Text("Back")
+                    }
                 }
-            }
 
-            if (index != 0 && index != 3) {
-                Button(onClick = {
-                    index++
-                }) {
-                    Text("Next")
+                Spacer(
+                    Modifier.padding(10.dp)
+                )
+
+                if (index != 0 && index != 4) {
+                    Button(onClick = {
+                        index++
+                    },
+                        colors = buttonColors
+                    ) {
+                        Text("Next")
+                    }
                 }
-            }
 
-            if (index == 3) {
-                Button(onClick = {
-                    onboardingViewModel.completeOnboarding()
-                    navController.navigate(Screen.Home.route)
-                }) {
-                    Text("Let's-a go!")
+                Spacer(
+                    Modifier.padding(10.dp)
+                )
+
+                if (index == 4) {
+                    Button(onClick = {
+                        onboardingViewModel.completeOnboarding()
+                        navController.navigate(Screen.Home.route)
+                    },
+                        colors = buttonColors
+                    ) {
+                        Text("Finish")
+                    }
                 }
             }
         }

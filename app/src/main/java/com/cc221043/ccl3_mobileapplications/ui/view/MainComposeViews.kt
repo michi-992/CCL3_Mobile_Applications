@@ -95,10 +95,8 @@ import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
 import com.cc221043.ccl3_mobileapplications.data.BookDao
@@ -387,124 +385,6 @@ fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel)
     }
 }
 
-
-@Composable
-fun BookDetails(mainViewModel: MainViewModel, navController: NavController, bookId: Int) {
-    val state = mainViewModel.mainViewState.collectAsState()
-    val book = state.value.selectedBook ?: return
-
-    var isMenuExpanded by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        AsyncImage(
-            model = book.cover,
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .clip(shape = RoundedCornerShape(8.dp))
-                .background(Color.Gray)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(text = "Title: ${book.title}", style = MaterialTheme.typography.displayMedium)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Author: ${book.author}", style = MaterialTheme.typography.displayMedium)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Platform/Format: ${book.platformat}",
-            style = MaterialTheme.typography.displayMedium
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Synopsis: ${book.synopsis}", style = MaterialTheme.typography.displayMedium)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Status: ${book.status}", style = MaterialTheme.typography.displayMedium)
-        Spacer(modifier = Modifier.height(8.dp))
-        if (book.rating != 0 && book.status == "Finished") {
-            RatingBar(rating = book.rating, onRatingChanged = {}, small = true)
-        }
-
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                if (bookId != null) {
-                    navController.navigate(Screen.Home.route)
-                    mainViewModel.selectBookDetails(bookId)
-                } else {
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-        ) {
-            Text(text = "Back to Home")
-        }
-
-        IconButton(
-            onClick = { isMenuExpanded = !isMenuExpanded },
-        ) {
-            Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
-        }
-
-        DropdownMenu(
-            expanded = isMenuExpanded,
-            onDismissRequest = { isMenuExpanded = false },
-            modifier = Modifier
-                .width(IntrinsicSize.Max)
-        ) {
-            DropdownMenuItem(
-                onClick = {
-                    isMenuExpanded = false
-                    navController.navigate("${Screen.EditBook.route}/$bookId")
-                },
-                text = { Text("Edit") },
-                enabled = true
-            )
-
-            DropdownMenuItem(
-                onClick = {
-                    isMenuExpanded = false
-                    showDeleteDialog = true
-                },
-                text = { Text("Delete") },
-                enabled = true
-            )
-        }
-    }
-
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Book") },
-            text = { Text("Are you sure you want to delete this book?") },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showDeleteDialog = false
-                        mainViewModel.deleteBook(book)
-                        navController.navigate(Screen.Home.route)
-                    }
-                ) {
-                    Text("Delete")
-                }
-            },
-            dismissButton = {
-                Button(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-}
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: NavController) {
@@ -560,99 +440,99 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
                     }
                 }
                 1 -> {
-                        Image(
-                            painter = painterResource(id = R.drawable.barry_happy),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(300.dp)
-                        )
-                        Text("Hello! I'm Barry the BiblioBat.",
-                            style = MaterialTheme.typography.titleMedium,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .padding(vertical = 8.dp)
-                                .fillMaxWidth()
-                        )
-                        Text("I'll help you keep track of all your reads.",
-                            style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .padding(vertical = 8.dp)
-                                .fillMaxWidth()
-                        )
+                    Image(
+                        painter = painterResource(id = R.drawable.barry_happy),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp)
+                    )
+                    Text("Hello! I'm Barry the BiblioBat.",
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth()
+                    )
+                    Text("I'll help you keep track of all your reads.",
+                        style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth()
+                    )
 
                 }
                 2 -> {
-                        Image(
-                            painter = painterResource(id = R.drawable.onboarding_one),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(300.dp)
-                        )
-                        Text("Easily find your books",
-                            style = MaterialTheme.typography.titleMedium,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .padding(vertical = 8.dp)
-                                .fillMaxWidth()
-                        )
-                        Text("You can search for a specific book you've added and view its details.",
-                            style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .padding(vertical = 8.dp)
-                                .fillMaxWidth()
-                        )
+                    Image(
+                        painter = painterResource(id = R.drawable.onboarding_one),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp)
+                    )
+                    Text("Easily find your books",
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth()
+                    )
+                    Text("You can search for a specific book you've added and view its details.",
+                        style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth()
+                    )
 
                 }
                 3 -> {
-                        Image(
-                            painter = painterResource(id = R.drawable.onboarding_two),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(300.dp)
-                        )
-                        Text("Keep track of your books",
-                            style = MaterialTheme.typography.titleMedium,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .padding(vertical = 8.dp)
-                                .fillMaxWidth()
-                        )
-                        Text("Organize your books for an easy overview of all your reads.",
-                            style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .padding(vertical = 8.dp)
-                                .fillMaxWidth()
-                        )
+                    Image(
+                        painter = painterResource(id = R.drawable.onboarding_two),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp)
+                    )
+                    Text("Keep track of your books",
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth()
+                    )
+                    Text("Organize your books for an easy overview of all your reads.",
+                        style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth()
+                    )
 
                 }
                 4 -> {
-                        Image(
-                            painter = painterResource(id = R.drawable.onboarding_three),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(300.dp)
-                        )
-                        Text("Track your status & rate your reads",
-                            style = MaterialTheme.typography.titleMedium,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .padding(vertical = 8.dp)
-                                .fillMaxWidth()
-                        )
-                        Text("Update your reading status and rate your book to keep up with your reading journey!",
-                            style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .padding(vertical = 8.dp)
-                                .fillMaxWidth()
-                        )
+                    Image(
+                        painter = painterResource(id = R.drawable.onboarding_three),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp)
+                    )
+                    Text("Track your status & rate your reads",
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth()
+                    )
+                    Text("Update your reading status and rate your book to keep up with your reading journey!",
+                        style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth()
+                    )
 
                 }
             }

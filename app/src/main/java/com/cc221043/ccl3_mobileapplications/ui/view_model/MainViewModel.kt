@@ -41,6 +41,18 @@ class MainViewModel(
         }
     }
 
+    fun getBooksBySearch(searchText: String) {
+        viewModelScope.launch {
+            dao.getBooksBySearch(searchText).collect() {books ->
+                _mainViewState.update { it.copy(searchedBooks = books) }
+            }
+        }
+    }
+
+    fun resetSearch() {
+        _mainViewState.update { it.copy(searchedBooks = emptyList()) }
+    }
+
     fun getAllBooksForGenres() {
         viewModelScope.launch {
             dao.getAllBooks().collect() {books ->
@@ -49,13 +61,7 @@ class MainViewModel(
         }
     }
 
-    fun getBooksByQuery(searchText: String) {
-        viewModelScope.launch {
-            dao.getBooksBySearch(searchText).collect() {books ->
-                _mainViewState.update { it.copy(books = books) }
-            }
-        }
-    }
+
 
     fun updateSelectedGenres(genres: List<String>) {
         val selectedBooks = _mainViewState.value.booksForGenres.filter { book ->

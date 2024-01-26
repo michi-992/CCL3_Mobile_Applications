@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -94,8 +95,10 @@ import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
 import com.cc221043.ccl3_mobileapplications.data.BookDao
@@ -511,7 +514,22 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
         }
     }
 
-    val pagerState = rememberPagerState { 4 }
+    val buttonColors = ButtonDefaults.buttonColors(
+        contentColor = Colors.OffWhite,
+        containerColor = Colors.PrimaryBlueDark,
+        disabledContentColor = Colors.OffWhite,
+        disabledContainerColor = Colors.Blue0,
+    )
+
+    val buttonColorsSecondary = ButtonDefaults.buttonColors(
+        contentColor = Colors.OffWhite,
+        containerColor = Color.Transparent,
+//        borderColor = Colors.PrimaryBlueDark,
+        disabledContentColor = Colors.OffWhite,
+        disabledContainerColor = Colors.Blue0,
+    )
+
+    val pagerState = rememberPagerState { 5 }
     var index by remember {
         mutableIntStateOf(0)
     }
@@ -536,61 +554,179 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
             when (index) {
                 0 -> {
                     LoadingScreen()
-//                    Image(
-//                        painter = painterResource(id = R.drawable.bat_filled),
-//                        contentDescription = null,
-//                        colorFilter = ColorFilter.tint(Color.LightGray),
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .fillMaxHeight()
-//                    )
                     LaunchedEffect(Unit) {
                         delay(2000)
                         index++
                     }
                 }
                 1 -> {
-                    Text("Boom 1")
+                        Image(
+                            painter = painterResource(id = R.drawable.barry_happy),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp)
+                        )
+                        Text("Hello! I'm Barry the BiblioBat.",
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .fillMaxWidth()
+                        )
+                        Text("I'll help you keep track of all your reads.",
+                            style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .fillMaxWidth()
+                        )
+
                 }
                 2 -> {
-                    Text("Boom 2")
+                        Image(
+                            painter = painterResource(id = R.drawable.onboarding_one),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp)
+                        )
+                        Text("Easily find your books",
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .fillMaxWidth()
+                        )
+                        Text("You can search for a specific book you've added and view its details.",
+                            style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .fillMaxWidth()
+                        )
+
                 }
                 3 -> {
-                    Text("Boom 3")
+                        Image(
+                            painter = painterResource(id = R.drawable.onboarding_two),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp)
+                        )
+                        Text("Keep track of your books",
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .fillMaxWidth()
+                        )
+                        Text("Organize your books for an easy overview of all your reads.",
+                            style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .fillMaxWidth()
+                        )
+
+                }
+                4 -> {
+                        Image(
+                            painter = painterResource(id = R.drawable.onboarding_three),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp)
+                        )
+                        Text("Track your status & rate your reads",
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .fillMaxWidth()
+                        )
+                        Text("Update your reading status and rate your book to keep up with your reading journey!",
+                            style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .fillMaxWidth()
+                        )
+
                 }
             }
 
-            if (index != 0 && index != 3) {
-                Button(onClick = {
-                    onboardingViewModel.completeOnboarding()
-                    navController.navigate(Screen.Home.route)
-                }) {
-                    Text("Skip")
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                if (index != 0 && index != 4) {
+                    Button(onClick = {
+                        onboardingViewModel.completeOnboarding()
+                        navController.navigate(Screen.Home.route)
+                    },
+                        colors = buttonColorsSecondary,
+                        modifier = Modifier
+                            .border(
+                                width = 1.dp,
+                                color = Colors.PrimaryBlueDark,
+                                shape = CircleShape
+                            )
+                    ) {
+                        Text("Skip")
+                    }
                 }
-            }
 
-            if (index != 0 && index != 1) {
-                Button(onClick = {
-                    index--
-                }) {
-                    Text("Back")
+                Spacer(
+                    Modifier.padding(10.dp)
+                )
+
+                if (index != 0 && index != 1) {
+                    Button(onClick = {
+                        index--
+                    },
+                        colors = buttonColorsSecondary,
+                        modifier = Modifier
+                            .border(
+                                width = 1.dp,
+                                color = Colors.PrimaryBlueDark,
+                                shape = CircleShape
+                            )
+                    )  {
+                        Text("Back")
+                    }
                 }
-            }
 
-            if (index != 0 && index != 3) {
-                Button(onClick = {
-                    index++
-                }) {
-                    Text("Next")
+                Spacer(
+                    Modifier.padding(10.dp)
+                )
+
+                if (index != 0 && index != 4) {
+                    Button(onClick = {
+                        index++
+                    },
+                        colors = buttonColors
+                    ) {
+                        Text("Next")
+                    }
                 }
-            }
 
-            if (index == 3) {
-                Button(onClick = {
-                    onboardingViewModel.completeOnboarding()
-                    navController.navigate(Screen.Home.route)
-                }) {
-                    Text("Let's-a go!")
+                Spacer(
+                    Modifier.padding(10.dp)
+                )
+
+                if (index == 4) {
+                    Button(onClick = {
+                        onboardingViewModel.completeOnboarding()
+                        navController.navigate(Screen.Home.route)
+                    },
+                        colors = buttonColors
+                    ) {
+                        Text("Finish")
+                    }
                 }
             }
         }

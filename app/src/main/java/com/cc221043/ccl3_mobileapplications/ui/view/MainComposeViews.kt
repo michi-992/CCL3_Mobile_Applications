@@ -1,9 +1,12 @@
 package com.cc221043.ccl3_mobileapplications.ui.view
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -84,10 +88,16 @@ import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.sp
 import com.cc221043.ccl3_mobileapplications.data.BookDao
 import com.cc221043.ccl3_mobileapplications.ui.view_model.OnboardingViewModel
 import kotlinx.coroutines.delay
@@ -125,7 +135,6 @@ fun MainView(
                 }
                 is Screen.Onboarding -> {
                 }
-
                 is Screen.AddBook -> {
                     AddBookTopBar(mainViewModel, navController)
                 }
@@ -205,13 +214,9 @@ private fun observeOnboardingCompletion(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
-    val state = mainViewModel.mainViewState.collectAsState()
-    val books = state.value.books
-
-
     val buttonColors = ButtonDefaults.buttonColors(
         contentColor = Colors.OffWhite,
         containerColor = Colors.PrimaryBlueDark,
@@ -221,20 +226,11 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
-            var tabIndex by remember {
-                mutableIntStateOf(0)
-            }
-            var flag by remember {
-                mutableStateOf(false)
-            }
-            var flag2 by remember {
-                mutableStateOf(false)
-            }
-            val tabs = listOf("All Books", "Categories")
+            var tabIndex by remember { mutableIntStateOf(0) }
+            var flag by remember { mutableStateOf(false) }
+            var flag2 by remember { mutableStateOf(false) }
+            val pagerState = rememberPagerState { 2 }
 
-            val pagerState = rememberPagerState {
-                tabs.size
-            }
             LaunchedEffect(tabIndex) {
                 pagerState.animateScrollToPage(tabIndex)
             }
@@ -271,21 +267,19 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
                 )
             }
             when (tabIndex) {
-                0 -> {
-                    if (flag) {
-                        mainViewModel.getAllBooks()
+                0 -> { if (flag) {
+                    mainViewModel.getAllBooks()
                         flag = false
                     }
                 }
 
-                1 -> {
-                    if (flag2) {
+                1 -> { if (flag2) {
                         mainViewModel.getAllBooks()
                         flag2 = false
-//                        searchText = ""
                     }
                 }
             }
+
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier
@@ -293,26 +287,20 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
                     .weight(1f)
             ) { index ->
                 when (index) {
-                    0 -> {
-                        HomeScreenAllBooks(books, navController, mainViewModel)
-                    }
-
-                    1 -> {
-                        HomeScreenGenres(navController, mainViewModel)
-                    }
+                    0 -> { HomeScreenAllBooks(mainViewModel, navController) }
+                    1 -> { HomeScreenGenres(navController, mainViewModel) }
                 }
             }
         }
         Button(
-                onClick = { navController.navigate("AddBook") },
-        shape = RoundedCornerShape(8.dp),
-        colors = buttonColors,
-        modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .padding(bottom = 10.dp)
-            .background(color = Colors.Blue1, shape = RoundedCornerShape(12.dp))
-            .padding(vertical = 10.dp, horizontal = 12.dp)
-
+            onClick = { navController.navigate("AddBook") },
+            shape = RoundedCornerShape(12.dp),
+            colors = buttonColors,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 10.dp)
+                .background(color = Colors.Blue1, shape = RoundedCornerShape(16.dp))
+                .padding(vertical = 10.dp, horizontal = 12.dp)
         ) {
             Row(
                 modifier = Modifier.padding(vertical = 4.dp),
@@ -326,12 +314,11 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenAllBooks(books: List<Book>, navController: NavController, mainViewModel: MainViewModel) {
+fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavController) {
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
-    var searchText by rememberSaveable { mutableStateOf("") }
     val state = mainViewModel.mainViewState.collectAsState()
+    val books = if(state.value.searchedBooks.isEmpty()) state.value.books else state.value.searchedBooks
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -343,108 +330,13 @@ fun HomeScreenAllBooks(books: List<Book>, navController: NavController, mainView
                     brush = Brush.verticalGradient(
                         colors = gradientColors,
                     )
-                )
-                .padding(start = 14.dp, end = 14.dp, top = 16.dp),
+                ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            TextField(
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    containerColor = Colors.Blue1,
-                    focusedLeadingIconColor = Colors.OffWhite,
-                    textColor = Colors.OffWhite,
-                    unfocusedLeadingIconColor = Colors.Blue5,
-                    focusedTrailingIconColor = Colors.OffWhite,
-                    placeholderColor = Colors.Blue5
-                ),
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(shape = CircleShape, elevation = 6.dp),
-                shape = CircleShape,
-                value = searchText,
-                onValueChange = {
-                    searchText = it
-                    mainViewModel.getBooksByQuery(searchText)
-                },
-                placeholder = { Text("Search") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = null
-                    )
-                },
-                trailingIcon = {
-                    if (searchText.isNotEmpty()) {
-                        IconButton(
-                            onClick = {
-                                searchText = ""
-                                mainViewModel.getAllBooks()
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Clear,
-                                contentDescription = null
-                            )
-                        }
-                    }
-                },
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Search
-                ),
-                keyboardActions = KeyboardActions(
-                    onSearch = {
-                        mainViewModel.getBooksByQuery(searchText)
-                    }
-                ),
-            )
-            BookGrid(mainViewModel, navController, books)
+            SearchBar(mainViewModel)
+            BookGrid(navController, books)
         }
     }
-}
-
-@Composable
-fun BookGrid(mainViewModel: MainViewModel, navController: NavController, books: List<Book>) {
-    Column (modifier = Modifier.fillMaxSize()) {
-        LazyVerticalGrid(
-            modifier = Modifier
-                .heightIn(min = 200.dp)
-                .padding(top = 14.dp)
-                .weight(1f)
-                .fillMaxWidth(1f),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            columns = GridCells.Fixed(3),
-            content = {
-                items(books.size) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(154.dp)
-
-                            .clickable {
-                                navController.navigate("${Screen.BookDetails.route}/${books[it].id}")
-                            }
-                    ) {
-                        AsyncImage(
-                            modifier = Modifier.clip(RoundedCornerShape(4.dp)),
-                            model = books[it].cover,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                }
-                items(3) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(3.0f)
-                            .height(100.dp)
-                    )
-                }
-            })
-    }
-
 }
 
 @Composable
@@ -455,7 +347,6 @@ fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel)
     val state = mainViewModel.mainViewState.collectAsState()
     val books = if(state.value.selectedBooksForGenres.isEmpty() && selectedNames.isEmpty()) state.value.booksForGenres else state.value.selectedBooksForGenres
 
-
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -466,11 +357,12 @@ fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel)
                     brush = Brush.verticalGradient(
                         colors = gradientColors,
                     )
-                )
-                .padding(start = 14.dp, end = 14.dp, top = 16.dp),
+                ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LazyRow {
+            LazyRow (
+                modifier = Modifier.padding(top = 20.dp, start = 14.dp, end = 14.dp)
+            ){
                 items(genreArray) { name ->
                     GenreButton(
                         name = name,
@@ -487,205 +379,12 @@ fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel)
                     )
                 }
             }
-            BookGrid(mainViewModel, navController, books)
+            BookGrid(navController, books)
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickImage: () -> Unit) {
-    val state = mainViewModel.mainViewState.collectAsState()
-    val genreArray = stringArrayResource(id = R.array.genres)
-    var selectedGenres by remember { mutableStateOf(emptyList<String>()) }
 
-    Column(
-        Modifier.verticalScroll(rememberScrollState())
-    ) {
-        var title by rememberSaveable { mutableStateOf("") }
-        var author by rememberSaveable { mutableStateOf("") }
-        var platformat by rememberSaveable { mutableStateOf("") }
-        var synopsis by rememberSaveable { mutableStateOf("") }
-        var status by rememberSaveable { mutableStateOf("") }
-        var rating by remember { mutableIntStateOf(0) }
-
-
-        val iconButtonColors = rememberUpdatedState(
-            IconButtonDefaults.iconButtonColors(
-                contentColor = Colors.OffWhite,
-                containerColor = Colors.Blue0,
-                disabledContentColor = Colors.OffWhite,
-                disabledContainerColor = Colors.Blue0,
-            )
-        )
-
-        Column {
-            if (state.value.selectedImageURI != null) {
-                AsyncImage(
-                    model = state.value.selectedImageURI,
-                    contentDescription = null,
-                    modifier = Modifier.width(80.dp)
-                )
-            }
-
-            if (state.value.selectedImageURI == Uri.parse("")) {
-                Button(
-                    onClick = {
-                        onPickImage()
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AddCircle,
-                        contentDescription = null
-                    )
-                }
-            }
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 20.dp),
-                value = title,
-                onValueChange = { newText -> title = newText },
-                label = { Text(text = "Title") })
-
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 20.dp),
-                value = author,
-                onValueChange = { newText -> author = newText },
-                label = { Text(text = "Author") })
-
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 20.dp),
-                value = platformat,
-                onValueChange = { newText -> platformat = newText },
-                label = { Text(text = "Platform/Format") })
-
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(vertical = 20.dp),
-                value = synopsis,
-                onValueChange = { newText -> synopsis = newText },
-                label = { Text(text = "Synopsis") })
-
-            Row(
-                Modifier.horizontalScroll(rememberScrollState())
-            ) {
-                Button(
-                    onClick = {
-                        status = "Not started"
-                        rating = 0
-                    }
-                ) {
-                    Row {
-                        Icon(imageVector = Icons.Default.Clear, contentDescription = null)
-                        Text(text = "Not started")
-                    }
-                }
-                Button(onClick = {
-                    status = "In Progress"
-                    rating = 0
-                }) {
-                    Row {
-                        Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)
-                        Text(text = "In Progress")
-                    }
-
-                }
-                Button(onClick = {
-                    status = "Finished"
-                }) {
-                    Row {
-                        Icon(imageVector = Icons.Default.Check, contentDescription = null)
-                        Text(text = "Finished")
-                    }
-                }
-            }
-            if (status == "Finished") {
-                RatingBar(
-                    rating = rating, onRatingChanged = {
-                        rating = it
-                    },
-                    modifier = Modifier.padding(16.dp),
-                    small = false
-                )
-                Button(onClick = { rating = 0 }) {
-                    Text(text = "Clear")
-                }
-            }
-            LazyRow {
-                items(genreArray) { name ->
-                    GenreButton(
-                        name = name,
-                        isSelected = selectedGenres.contains(name),
-                        onNameClicked = {
-                            selectedGenres = if (selectedGenres.contains(name)) {
-                                selectedGenres - name
-                            } else {
-                                selectedGenres + name
-                            }
-                            println(selectedGenres)
-                        }
-                    )
-                }
-            }
-
-
-            Button(onClick = {
-                val newBook = Book(
-                    title = title,
-                    author = author,
-                    platformat = platformat,
-                    rating = rating,
-                    synopsis = synopsis,
-                    status = status,
-                    genres = selectedGenres
-                )
-
-                mainViewModel.previousScreen(state.value.selectedScreen.route)
-                val insertedId = mainViewModel.saveBookAndImage(newBook)
-                navController.navigate("${Screen.BookDetails.route}/$insertedId")
-            }) {
-                Text(text = "Save book")
-            }
-        }
-    }
-}
-
-@Composable
-fun RatingBar(
-    rating: Int, onRatingChanged: (Int) -> Unit, modifier: Modifier = Modifier, small: Boolean
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        for (i in 1..5) {
-            val isSelected = i <= rating
-            Icon(
-                painter = if (isSelected) painterResource(id = R.drawable.bat_filled) else painterResource(
-                    id = R.drawable.battybatbat
-                ),
-                contentDescription = null,
-                modifier = if (small) Modifier
-                    .size(30.dp)
-                    .clickable { onRatingChanged(i) } else Modifier
-                    .size(60.dp)
-                    .clickable { onRatingChanged(i) },
-                tint = Colors.Blue6
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookDetails(mainViewModel: MainViewModel, navController: NavController, bookId: Int) {
     val state = mainViewModel.mainViewState.collectAsState()
@@ -693,15 +392,6 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
 
     var isMenuExpanded by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
-
-    val iconButtonColors = rememberUpdatedState(
-        IconButtonDefaults.iconButtonColors(
-            contentColor = Colors.OffWhite,
-            containerColor = Colors.Blue0,
-            disabledContentColor = Colors.OffWhite,
-            disabledContainerColor = Colors.Blue0,
-        )
-    )
 
     Column(
         modifier = Modifier
@@ -812,206 +502,6 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun EditBook(
-    mainViewModel: MainViewModel,
-    navController: NavController,
-    bookId: Int,
-    onPickImage: () -> Unit
-) {
-    val state = mainViewModel.mainViewState.collectAsState()
-    val book = state.value.selectedBook ?: return
-
-    val genreArray = stringArrayResource(id = R.array.genres)
-    var selectedGenres by remember { mutableStateOf(book.genres) }
-
-    Column(
-        Modifier.verticalScroll(rememberScrollState())
-    ) {
-        var title by rememberSaveable { mutableStateOf(book.title) }
-        var author by rememberSaveable { mutableStateOf(book.author) }
-        var platformat by rememberSaveable { mutableStateOf(book.platformat) }
-        var synopsis by rememberSaveable { mutableStateOf(book.synopsis) }
-        var status by rememberSaveable { mutableStateOf(book.status) }
-        var rating by remember { mutableIntStateOf(book.rating) }
-
-        val iconButtonColors = rememberUpdatedState(
-            IconButtonDefaults.iconButtonColors(
-                contentColor = Colors.OffWhite,
-                containerColor = Colors.Blue0,
-                disabledContentColor = Colors.OffWhite,
-                disabledContainerColor = Colors.Blue0,
-            )
-        )
-
-        Column {
-            if (state.value.selectedImageURI == Uri.parse("")) {
-                AsyncImage(
-                    model = book.cover,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(shape = RoundedCornerShape(8.dp))
-                        .background(Color.Gray)
-                )
-                Button(
-                    onClick = {
-                        onPickImage()
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = null
-                    )
-                }
-            } else {
-                AsyncImage(
-                    model = state.value.selectedImageURI,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(shape = RoundedCornerShape(8.dp))
-                        .background(Color.Gray)
-                )
-                Button(
-                    onClick = {
-                        onPickImage()
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = null
-                    )
-                }
-            }
-
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 20.dp),
-                value = title,
-                onValueChange = { newText -> title = newText },
-                label = { Text(text = "Title") }
-            )
-
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 20.dp),
-                value = author,
-                onValueChange = { newText -> author = newText },
-                label = { Text(text = "Author") }
-            )
-
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 20.dp),
-                value = platformat,
-                onValueChange = { newText -> platformat = newText },
-                label = { Text(text = "Platform/Format") }
-            )
-
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 20.dp),
-                value = synopsis,
-                onValueChange = { newText -> synopsis = newText },
-                label = { Text(text = "Synopsis") }
-            )
-
-            Row(
-                Modifier.horizontalScroll(rememberScrollState())
-            ) {
-                Button(
-                    onClick = {
-                        status = "Not started"
-                        rating = 0
-                    }
-                ) {
-                    Row {
-                        Icon(imageVector = Icons.Default.Clear, contentDescription = null)
-                        Text(text = "Not started")
-                    }
-                }
-                Button(onClick = {
-                    status = "In Progress"
-                    rating = 0
-                }) {
-                    Row {
-                        Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)
-                        Text(text = "In Progress")
-                    }
-
-                }
-                Button(onClick = {
-                    status = "Finished"
-                }) {
-                    Row {
-                        Icon(imageVector = Icons.Default.Check, contentDescription = null)
-                        Text(text = "Finished")
-                    }
-                }
-            }
-            if (status == "Finished") {
-                RatingBar(
-                    rating = rating, onRatingChanged = {
-                        rating = it
-                    },
-                    modifier = Modifier.padding(16.dp),
-                    small = false
-                )
-                Button(onClick = { rating = 0 }) {
-                    Text(text = "Clear")
-                }
-            }
-            LazyRow {
-                items(genreArray) { name ->
-                    GenreButton(
-                        name = name,
-                        isSelected = selectedGenres.contains(name),
-                        onNameClicked = {
-                            selectedGenres = if (selectedGenres.contains(name)) {
-                                selectedGenres - name
-                            } else {
-                                selectedGenres + name
-                            }
-                            println(selectedGenres)
-                        }
-                    )
-                }
-            }
-
-
-            Button(
-                onClick = {
-                    val editedBook = Book(
-                        id = book.id,
-                        title = title,
-                        author = author,
-                        platformat = platformat,
-                        rating = rating,
-                        synopsis = synopsis,
-                        status = status,
-                        cover = book.cover,
-                        genres = selectedGenres
-                    )
-                    mainViewModel.previousScreen(state.value.selectedScreen.route)
-                    mainViewModel.updateBookAndImage(editedBook)
-                    navController.navigate("${Screen.BookDetails.route}/${editedBook.id}")
-                }
-            ) {
-                Text(text = "Save Changes")
-            }
-        }
-    }
-}
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: NavController) {
@@ -1107,17 +597,3 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
     }
 }
 
-@Composable
-fun LoadingScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Colors.Blue0),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator(
-            modifier = Modifier.size(100.dp),
-            color = Colors.PrimaryBlue,
-            strokeWidth = 15.dp)
-    }
-}

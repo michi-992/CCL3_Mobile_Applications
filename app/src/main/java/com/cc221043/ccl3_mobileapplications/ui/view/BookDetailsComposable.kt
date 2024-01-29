@@ -211,36 +211,6 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
                 Icon(imageVector = Icons.Default.Delete, contentDescription = null, tint = Colors.OffWhite)
             }
         }
-
-//        IconButton(
-//            onClick = { isMenuExpanded = !isMenuExpanded },
-//        ) {
-//            Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null, tint = Colors.OffWhite)
-//        }
-//        DropdownMenu(
-//            expanded = isMenuExpanded,
-//            onDismissRequest = { isMenuExpanded = false },
-//            modifier = Modifier
-//                .width(IntrinsicSize.Max)
-//        ) {
-//            DropdownMenuItem(
-//                onClick = {
-//                    isMenuExpanded = false
-//                    navController.navigate("${Screen.EditBook.route}/$bookId")
-//                },
-//                text = { Text("Edit") },
-//                enabled = true
-//            )
-//
-//            DropdownMenuItem(
-//                onClick = {
-//                    isMenuExpanded = false
-//                    showDeleteDialog = true
-//                },
-//                text = { Text("Delete") },
-//                enabled = true
-//            )
-//        }
     }
 
     if (showDeleteDialog) {
@@ -264,7 +234,8 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
             },
             dismissButton = {
                 Button(onClick = { showDeleteDialog = false },
-                    modifier = Modifier.border(BorderStroke(2.dp, Colors.PrimaryBlue)),
+                    modifier = Modifier
+                        .border(BorderStroke(2.dp, Colors.PrimaryBlue), shape = CircleShape),
                     colors = ButtonDefaults.buttonColors(
                         contentColor = Colors.OffWhite,
                         containerColor = Color.Transparent

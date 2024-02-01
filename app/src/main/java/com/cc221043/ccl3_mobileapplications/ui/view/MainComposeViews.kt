@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -377,7 +378,26 @@ fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavControlle
                     }
                 ),
             )
-            BookGrid(navController, books)
+            if (books.isEmpty()) {
+                Image(
+                    painter = painterResource(id = R.drawable.barry_bored),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp)
+                )
+                Text(
+                    text = "No books yet. Try adding a book so Barry has something to read.",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                    color = Colors.Blue5
+                )
+            } else {
+                BookGrid(navController, books)
+            }
         }
     }
 }
@@ -403,9 +423,9 @@ fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel)
                 ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LazyRow (
+            LazyRow(
                 modifier = Modifier.padding(top = 20.dp, start = 14.dp, end = 14.dp)
-            ){
+            ) {
                 items(genreArray) { name ->
                     GenreButton(
                         name = name,
@@ -422,7 +442,26 @@ fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel)
                     )
                 }
             }
-            BookGrid(navController, books)
+            if (books.isEmpty()) {
+                Image(
+                    painter = painterResource(id = R.drawable.barry_bored),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp)
+                )
+                Text(
+                    text = "No books yet. Try adding a book of this genre so Barry has something to read.",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                    color = Colors.Blue5
+                )
+            } else {
+                BookGrid(navController, books)
+            }
         }
     }
 }

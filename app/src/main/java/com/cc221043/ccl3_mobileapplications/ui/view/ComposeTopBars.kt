@@ -13,6 +13,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -28,7 +31,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -127,6 +134,8 @@ fun BookDetailsTopBar(
 
     val book = state.value.selectedBook ?: return
 
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
     val iconButtonColors = rememberUpdatedState(
         IconButtonDefaults.iconButtonColors(
             contentColor = Colors.OffWhite,
@@ -158,43 +167,33 @@ fun BookDetailsTopBar(
             )
         },
         actions = {
+            var showDropDownMenu by remember { mutableStateOf(false) }
+
             IconButton(
-                onClick = { mainViewModel.toggleMenu() },
-                colors = iconButtonColors.value
-            ) {
-                Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
+                onClick = { showDropDownMenu = true }) {
+                Icon(Icons.Default.MoreVert, null, tint = Colors.OffWhite)
+
             }
 
             DropdownMenu(
-                expanded = mainViewModel.isMenuExpanded,
-                onDismissRequest = { mainViewModel.toggleMenu() },
-                modifier = Modifier.width(IntrinsicSize.Max)
+                showDropDownMenu, { showDropDownMenu = false }
             ) {
-                DropdownMenuItem(
-                    onClick = {
-                        mainViewModel.toggleMenu()
-                        onEditClick()
-                    },
-                    text = { Text("Edit", style = TextStyle(color = Colors.OffWhite)) },
-                    enabled = true
-                )
+                DropdownMenuItem(text = { Text(text = "Edit") }, onClick = {
+                    showDropDownMenu = false
+                })
 
-                DropdownMenuItem(
-                    onClick = {
-                        mainViewModel.toggleMenu()
-                        mainViewModel.showDeleteDialog()
-                    },
-                    text = { Text("Delete", style = TextStyle(color = Colors.OffWhite)) },
-                    enabled = true
-                )
+                DropdownMenuItem(text = { Text(text = "Delete") }, onClick = {
+                    showDeleteDialog = true
+                    showDropDownMenu = false
+                })
             }
         },
         scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
     )
 
-    if (mainViewModel.showDeleteDialog) {
+    if (showDeleteDialog) {
         AlertDialog(
-            onDismissRequest = { mainViewModel.hideDeleteDialog() },
+            onDismissRequest = { showDeleteDialog = false },
             title = { Text("Delete Book", style = TextStyle(color = Colors.Blue5)) },
             text = { Text("Are you sure you want to delete this book?", style = TextStyle(color = Colors.Blue4)) },
             confirmButton = {
@@ -203,7 +202,7 @@ fun BookDetailsTopBar(
                     containerColor = Colors.PrimaryBlue
                 ),
                     onClick = {
-                        mainViewModel.hideDeleteDialog()
+                        showDeleteDialog = false
                         mainViewModel.deleteBook(book)
                         navController.navigate(Screen.Home.route)
                     }
@@ -212,7 +211,7 @@ fun BookDetailsTopBar(
                 }
             },
             dismissButton = {
-                Button(onClick = { mainViewModel.hideDeleteDialog() },
+                Button(onClick = { showDeleteDialog = false },
                     modifier = Modifier
                         .border(BorderStroke(2.dp, Colors.PrimaryBlue), shape = CircleShape),
                     colors = ButtonDefaults.buttonColors(

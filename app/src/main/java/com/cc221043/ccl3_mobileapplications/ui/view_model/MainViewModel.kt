@@ -160,20 +160,4 @@ class MainViewModel(
             }
         }
     }
-
-    var isMenuExpanded by mutableStateOf(false)
-
-    var showDeleteDialog by mutableStateOf(false)
-
-    fun toggleMenu() {
-        isMenuExpanded = !isMenuExpanded
-    }
-
-    fun showDeleteDialog() {
-        showDeleteDialog = true
-    }
-
-    fun hideDeleteDialog() {
-        showDeleteDialog = false
-    }
 }

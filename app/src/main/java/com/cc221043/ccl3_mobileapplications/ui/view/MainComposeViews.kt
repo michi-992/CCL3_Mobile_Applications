@@ -404,7 +404,7 @@ fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel)
     val genreArray = stringArrayResource(id = R.array.genres)
     var selectedNames by remember { mutableStateOf(emptyList<String>()) }
     val state = mainViewModel.mainViewState.collectAsState()
-    val books = if(state.value.selectedBooksForGenres.isEmpty() && selectedNames.isEmpty()) state.value.booksForGenres else state.value.selectedBooksForGenres
+    val books = if(selectedNames.isEmpty()) state.value.booksForGenres else state.value.selectedBooksForGenres
 
     Box(
         modifier = Modifier.fillMaxSize()

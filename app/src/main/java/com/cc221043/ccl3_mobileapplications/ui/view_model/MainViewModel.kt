@@ -11,6 +11,7 @@ import com.cc221043.ccl3_mobileapplications.ui.view.Screen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -61,17 +62,19 @@ class MainViewModel(
         }
     }
 
-
+    fun getBooksByStatus(status: String) {
+        viewModelScope.launch {
+            dao.getBooksByStatus(status).collect() {books ->
+                _mainViewState.update { it.copy(searchedBooks = books) }
+            }
+        }
+    }
 
     fun updateSelectedGenres(genres: List<String>) {
         val selectedBooks = _mainViewState.value.booksForGenres.filter { book ->
             book.genres.containsAll(genres)
         }
         _mainViewState.update { it.copy(selectedBooksForGenres = selectedBooks) }
-        print("genres ")
-        println(genres)
-        print("Selected Book for genres ")
-        println(_mainViewState.value.selectedBooksForGenres)
     }
 
 
@@ -118,8 +121,9 @@ class MainViewModel(
 
     fun selectBookDetails(id: Int) {
         viewModelScope.launch {
-            val book = dao.getBookById(id)
-            _mainViewState.update { it.copy(selectedBook = book) }
+            dao.getBookById(id).take(1).collect() {book ->
+                _mainViewState.update { it.copy(selectedBook = book) }
+            }
         }
     }
 

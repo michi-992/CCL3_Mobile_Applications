@@ -71,7 +71,7 @@ fun EditBook(
     onPickImage: () -> Unit
 ) {
     val state = mainViewModel.mainViewState.collectAsState()
-    val book = state.value.selectedBook ?: return
+    val book = state.value.selectedBook
     val genreArray = stringArrayResource(id = R.array.genres)
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
 

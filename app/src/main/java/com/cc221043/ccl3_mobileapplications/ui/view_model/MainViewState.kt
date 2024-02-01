@@ -11,7 +11,7 @@ data class MainViewState (
     val booksForGenres: List<Book> = emptyList(),
     val selectedBooksForGenres: List<Book> = emptyList(),
     val selectedImageURI: Uri = Uri.parse(""),
-    val selectedBook: Book? = null,
+    val selectedBook: Book = Book(title = "", status = "", platformat = "", synopsis = ""),
     val previousScreen: String = "",
     val test: List<Book> = emptyList(),
 )

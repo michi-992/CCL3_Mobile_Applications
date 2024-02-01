@@ -28,11 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -125,16 +121,11 @@ fun EditBookTopBar(mainViewModel: MainViewModel, navController: NavController) {
 fun BookDetailsTopBar(
     mainViewModel: MainViewModel,
     navController: NavController,
-    onEditClick: () -> Unit,
-    onDeleteClick: () -> Unit,
-//    isMenuExpanded: Boolean,
-    onMenuClick: () -> Unit
+    onEditClick: () -> Unit
 ) {
     val state = mainViewModel.mainViewState.collectAsState()
-//    var isMenuExpanded by remember { mutableStateOf(false) }
 
     val book = state.value.selectedBook ?: return
-//    var showDeleteDialog by remember { mutableStateOf(false) }
 
     val iconButtonColors = rememberUpdatedState(
         IconButtonDefaults.iconButtonColors(
@@ -168,7 +159,7 @@ fun BookDetailsTopBar(
         },
         actions = {
             IconButton(
-                onClick = {mainViewModel.toggleMenu() },
+                onClick = { mainViewModel.toggleMenu() },
                 colors = iconButtonColors.value
             ) {
                 Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
@@ -200,30 +191,6 @@ fun BookDetailsTopBar(
         },
         scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
     )
-
-//    DropdownMenu(
-//        expanded = mainViewModel.isMenuExpanded,
-//        onDismissRequest = { mainViewModel.toggleMenu() },
-//        modifier = Modifier.width(IntrinsicSize.Max)
-//    ) {
-//        DropdownMenuItem(
-//            onClick = {
-//                mainViewModel.toggleMenu()
-//                onEditClick()
-//            },
-//            text = { Text("Edit") },
-//            enabled = true
-//        )
-//
-//        DropdownMenuItem(
-//            onClick = {
-//                mainViewModel.toggleMenu()
-//                mainViewModel.showDeleteDialog()
-//            },
-//            text = { Text("Delete") },
-//            enabled = true
-//        )
-//    }
 
     if (mainViewModel.showDeleteDialog) {
         AlertDialog(

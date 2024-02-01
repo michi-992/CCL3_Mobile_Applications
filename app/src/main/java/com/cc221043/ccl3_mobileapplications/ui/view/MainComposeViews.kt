@@ -94,9 +94,6 @@ fun MainView(
         navController.navigate(Screen.Home.route)
     }
 
-    var isMenuExpanded by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
-
     Scaffold(
         topBar = {
             when (state.value.selectedScreen) {
@@ -116,19 +113,10 @@ fun MainView(
                 is Screen.BookDetails -> {
                     BookDetailsTopBar(
                         mainViewModel,
-                        navController,
-                        onEditClick = {
-                            navController.navigate("${Screen.EditBook.route}/${state.value.selectedBook?.id ?: -1}")
-                        },
-                        onDeleteClick = {
-                            state.value.selectedBook?.let {
-                                showDeleteDialog = true
-                            }
-                        },
-                        onMenuClick = {
-                            isMenuExpanded = !isMenuExpanded
-                        }
-                    )
+                        navController
+                    ) {
+                        navController.navigate("${Screen.EditBook.route}/${state.value.selectedBook?.id ?: -1}")
+                    }
                 }
             }
         }
@@ -159,9 +147,6 @@ fun MainView(
             composable("${Screen.BookDetails.route}/{bookId}") { backStackEntry ->
                 val bookId = backStackEntry.arguments?.getString("bookId")?.toIntOrNull() ?: -1
 
-//                val isMenuExpanded = remember { mutableStateOf(false) }
-//                var showDeleteDialog by remember { mutableStateOf(false) }
-
                 mainViewModel.selectedScreen(Screen.BookDetails)
                 mainViewModel.selectBookDetails(bookId)
 
@@ -169,28 +154,16 @@ fun MainView(
                     navController.navigate("${Screen.EditBook.route}/$bookId")
                 }
 
-                val onDeleteClick: () -> Unit = {
-                    mainViewModel.showDeleteDialog()
-                }
-
-                val onMenuClick: () -> Unit = {
-                    mainViewModel.toggleMenu()
-                }
-
                 BookDetailsTopBar(
                     mainViewModel = mainViewModel,
                     navController = navController,
-                    onEditClick = onEditClick,
-                    onDeleteClick = onDeleteClick,
-                    onMenuClick = onMenuClick
+                    onEditClick = onEditClick
                 )
 
                 BookDetails(
                     mainViewModel = mainViewModel,
                     navController = navController,
-                    bookId = bookId//,
-//                    isMenuExpanded = isMenuExpanded,
-//                    showDeleteDialog = showDeleteDialog
+                    bookId = bookId
                 )
             }
             composable(Screen.EditBook.route + "/{bookId}") { backStackEntry ->

@@ -50,21 +50,12 @@ import com.cc221043.ccl3_mobileapplications.R
 import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
 
-
-
-//, isMenuExpanded: MutableState<Boolean>, showDeleteDialog: Boolean
-
-
-
 @Composable
 fun BookDetails(mainViewModel: MainViewModel, navController: NavController, bookId: Int) {
     val state = mainViewModel.mainViewState.collectAsState()
     val book = state.value.selectedBook ?: return
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
-//    var isMenuExpanded by remember { mutableStateOf(false) }
     val genreString = book.genres.joinToString().removePrefix("[").removePrefix(",").removeSuffix("]")
-
-//    var showDeleteDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -199,71 +190,5 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
                 color = Colors.Blue6
             )
         }
-
-
-//        Spacer(modifier = Modifier.height(16.dp))
-//        IconButton(
-//            onClick = { isMenuExpanded = !isMenuExpanded },
-//        ) {
-//            Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
-//        }
-
-//        DropdownMenu(
-//            expanded = isMenuExpanded,
-//            onDismissRequest = { isMenuExpanded = false },
-//            modifier = Modifier
-//                .width(IntrinsicSize.Max)
-//        ) {
-//            DropdownMenuItem(
-//                onClick = {
-//                    isMenuExpanded = false
-//                    navController.navigate("${Screen.EditBook.route}/$bookId")
-//                },
-//                text = { Text("Edit") },
-//                enabled = true
-//            )
-//
-//            DropdownMenuItem(
-//                onClick = {
-//                    isMenuExpanded = false
-//                    showDeleteDialog = true
-//                },
-//                text = { Text("Delete") },
-//                enabled = true
-//            )
-//        }
     }
-
-//    if (showDeleteDialog) {
-//        AlertDialog(
-//            onDismissRequest = { showDeleteDialog = false },
-//            title = { Text("Delete Book") },
-//            text = { Text("Are you sure you want to delete this book?") },
-//            confirmButton = {
-//                Button(colors = ButtonDefaults.buttonColors(
-//                    contentColor = Colors.OffWhite,
-//                    containerColor = Colors.PrimaryBlue
-//                ),
-//                    onClick = {
-//                        showDeleteDialog = false
-//                        mainViewModel.deleteBook(book)
-//                        navController.navigate(Screen.Home.route)
-//                    }
-//                ) {
-//                    Text("Delete")
-//                }
-//            },
-//            dismissButton = {
-//                Button(onClick = { showDeleteDialog = false },
-//                    modifier = Modifier
-//                        .border(BorderStroke(2.dp, Colors.PrimaryBlue), shape = CircleShape),
-//                    colors = ButtonDefaults.buttonColors(
-//                        contentColor = Colors.OffWhite,
-//                        containerColor = Color.Transparent
-//                    )) {
-//                    Text("Cancel")
-//                }
-//            }
-//        )
-//    }
 }

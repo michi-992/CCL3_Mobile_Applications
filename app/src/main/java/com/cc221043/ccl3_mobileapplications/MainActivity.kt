@@ -57,7 +57,6 @@ class MainActivity : ComponentActivity() {
 
     private val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            // Handle the returned image URI here
             uri?.let {
                 mainViewModel.updateImageURI(it)
                 println(mainViewModel.mainViewState.value.selectedImageURI)
@@ -65,8 +64,6 @@ class MainActivity : ComponentActivity() {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Handle the splash screen transition.
-//        installSplashScreen()
 
         super.onCreate(savedInstanceState)
         setContent {

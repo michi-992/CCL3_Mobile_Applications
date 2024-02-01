@@ -1,6 +1,9 @@
 package com.cc221043.ccl3_mobileapplications.ui.view_model
 
 import android.net.Uri
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cc221043.ccl3_mobileapplications.MainActivity
@@ -23,7 +26,6 @@ class MainViewModel(
 
     private val _mainViewState = MutableStateFlow(MainViewState())
     val mainViewState: StateFlow<MainViewState> = _mainViewState.asStateFlow()
-
 
     fun selectedScreen(screen: Screen) {
         _mainViewState.update { it.copy(selectedScreen = screen) }
@@ -150,7 +152,28 @@ class MainViewModel(
 
     fun deleteBook(book: Book) {
         viewModelScope.launch {
-            dao.deleteBook(book)
+            try {
+                dao.deleteBook(book)
+                println("Book deleted successfully")
+            } catch (e: Exception) {
+                println("Error deleting book: ${e.message}")
+            }
         }
+    }
+
+    var isMenuExpanded by mutableStateOf(false)
+
+    var showDeleteDialog by mutableStateOf(false)
+
+    fun toggleMenu() {
+        isMenuExpanded = !isMenuExpanded
+    }
+
+    fun showDeleteDialog() {
+        showDeleteDialog = true
+    }
+
+    fun hideDeleteDialog() {
+        showDeleteDialog = false
     }
 }

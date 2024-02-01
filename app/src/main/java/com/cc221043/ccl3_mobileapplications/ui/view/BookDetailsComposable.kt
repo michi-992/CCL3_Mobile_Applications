@@ -19,8 +19,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
@@ -33,6 +31,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,15 +51,20 @@ import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
 
 
+
+//, isMenuExpanded: MutableState<Boolean>, showDeleteDialog: Boolean
+
+
+
 @Composable
 fun BookDetails(mainViewModel: MainViewModel, navController: NavController, bookId: Int) {
     val state = mainViewModel.mainViewState.collectAsState()
     val book = state.value.selectedBook ?: return
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
-    var isMenuExpanded by remember { mutableStateOf(false) }
+//    var isMenuExpanded by remember { mutableStateOf(false) }
     val genreString = book.genres.joinToString().removePrefix("[").removePrefix(",").removeSuffix("]")
 
-    var showDeleteDialog by remember { mutableStateOf(false) }
+//    var showDeleteDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -197,52 +201,69 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
         }
 
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Row{
-            IconButton(
-                onClick = { navController.navigate("${Screen.EditBook.route}/$bookId") },
-            ) {
-                Icon(imageVector = Icons.Default.Edit, contentDescription = null, tint = Colors.OffWhite)
-            }
-            Spacer(modifier = Modifier.size(34.dp))
-            IconButton(
-                onClick = { showDeleteDialog = true },
-            ) {
-                Icon(imageVector = Icons.Default.Delete, contentDescription = null, tint = Colors.OffWhite)
-            }
-        }
+//        Spacer(modifier = Modifier.height(16.dp))
+//        IconButton(
+//            onClick = { isMenuExpanded = !isMenuExpanded },
+//        ) {
+//            Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
+//        }
+
+//        DropdownMenu(
+//            expanded = isMenuExpanded,
+//            onDismissRequest = { isMenuExpanded = false },
+//            modifier = Modifier
+//                .width(IntrinsicSize.Max)
+//        ) {
+//            DropdownMenuItem(
+//                onClick = {
+//                    isMenuExpanded = false
+//                    navController.navigate("${Screen.EditBook.route}/$bookId")
+//                },
+//                text = { Text("Edit") },
+//                enabled = true
+//            )
+//
+//            DropdownMenuItem(
+//                onClick = {
+//                    isMenuExpanded = false
+//                    showDeleteDialog = true
+//                },
+//                text = { Text("Delete") },
+//                enabled = true
+//            )
+//        }
     }
 
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Book") },
-            text = { Text("Are you sure you want to delete this book?") },
-            confirmButton = {
-                Button(colors = ButtonDefaults.buttonColors(
-                    contentColor = Colors.OffWhite,
-                    containerColor = Colors.PrimaryBlue
-                ),
-                    onClick = {
-                        showDeleteDialog = false
-                        mainViewModel.deleteBook(book)
-                        navController.navigate(Screen.Home.route)
-                    }
-                ) {
-                    Text("Delete")
-                }
-            },
-            dismissButton = {
-                Button(onClick = { showDeleteDialog = false },
-                    modifier = Modifier
-                        .border(BorderStroke(2.dp, Colors.PrimaryBlue), shape = CircleShape),
-                    colors = ButtonDefaults.buttonColors(
-                        contentColor = Colors.OffWhite,
-                        containerColor = Color.Transparent
-                    )) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
+//    if (showDeleteDialog) {
+//        AlertDialog(
+//            onDismissRequest = { showDeleteDialog = false },
+//            title = { Text("Delete Book") },
+//            text = { Text("Are you sure you want to delete this book?") },
+//            confirmButton = {
+//                Button(colors = ButtonDefaults.buttonColors(
+//                    contentColor = Colors.OffWhite,
+//                    containerColor = Colors.PrimaryBlue
+//                ),
+//                    onClick = {
+//                        showDeleteDialog = false
+//                        mainViewModel.deleteBook(book)
+//                        navController.navigate(Screen.Home.route)
+//                    }
+//                ) {
+//                    Text("Delete")
+//                }
+//            },
+//            dismissButton = {
+//                Button(onClick = { showDeleteDialog = false },
+//                    modifier = Modifier
+//                        .border(BorderStroke(2.dp, Colors.PrimaryBlue), shape = CircleShape),
+//                    colors = ButtonDefaults.buttonColors(
+//                        contentColor = Colors.OffWhite,
+//                        containerColor = Color.Transparent
+//                    )) {
+//                    Text("Cancel")
+//                }
+//            }
+//        )
+//    }
 }

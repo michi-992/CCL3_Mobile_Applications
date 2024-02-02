@@ -121,7 +121,7 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
             ),
             color = Colors.OffWhite,
             modifier = Modifier
-                .padding(22.dp)
+                .padding(horizontal = 22.dp)
         )
 
         // only displays optional information if it was input
@@ -134,7 +134,7 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
                 ),
                 color = Colors.Blue5,
                 modifier = Modifier
-                    .padding(22.dp)
+                    .padding(horizontal = 22.dp)
             )
         }
 

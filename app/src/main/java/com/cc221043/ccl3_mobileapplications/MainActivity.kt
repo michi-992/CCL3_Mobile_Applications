@@ -1,6 +1,9 @@
 package com.cc221043.ccl3_mobileapplications
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,7 +35,6 @@ import com.cc221043.ccl3_mobileapplications.ui.view_model.OnboardingViewModel
 
 class MainActivity : ComponentActivity() {
     private val onboardingDataStore: DataStore<Preferences> by preferencesDataStore(name = "onboarding_prefs")
-
     private val onboardingViewModel by viewModels<OnboardingViewModel> {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -43,7 +45,7 @@ class MainActivity : ComponentActivity() {
 
     private val db by lazy {
     Room.databaseBuilder(this, BookDatabase::class.java, "BookDatabase.db").build()
-}
+    }
 
     private val mainViewModel by viewModels<MainViewModel> (
         factoryProducer = {
@@ -57,7 +59,6 @@ class MainActivity : ComponentActivity() {
 
     private val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            // Handle the returned image URI here
             uri?.let {
                 mainViewModel.updateImageURI(it)
                 println(mainViewModel.mainViewState.value.selectedImageURI)
@@ -65,13 +66,10 @@ class MainActivity : ComponentActivity() {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Handle the splash screen transition.
-//        installSplashScreen()
 
         super.onCreate(savedInstanceState)
         setContent {
             CCL3MobileApplicationsTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -80,5 +78,23 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private var doubleBackToExitPressedOnce = false
+
+    override fun onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed()
+            finish()
+            return
+        }
+
+        this.doubleBackToExitPressedOnce = true
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show()
+
+        Handler(Looper.getMainLooper()).postDelayed(
+            { doubleBackToExitPressedOnce = false },
+            2000
+        )
     }
 }

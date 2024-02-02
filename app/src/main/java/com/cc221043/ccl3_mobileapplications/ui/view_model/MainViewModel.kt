@@ -1,6 +1,9 @@
 package com.cc221043.ccl3_mobileapplications.ui.view_model
 
 import android.net.Uri
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cc221043.ccl3_mobileapplications.MainActivity
@@ -24,7 +27,6 @@ class MainViewModel(
 
     private val _mainViewState = MutableStateFlow(MainViewState())
     val mainViewState: StateFlow<MainViewState> = _mainViewState.asStateFlow()
-
 
     fun selectedScreen(screen: Screen) {
         _mainViewState.update { it.copy(selectedScreen = screen) }
@@ -62,12 +64,9 @@ class MainViewModel(
         }
     }
 
-    fun getBooksByStatus(status: String) {
-        viewModelScope.launch {
-            dao.getBooksByStatus(status).collect() {books ->
-                _mainViewState.update { it.copy(searchedBooks = books) }
-            }
-        }
+    fun changeStatusFilteredBooks(books: List<Book>, status: String) {
+        val filteredBooks = books.filter { it.status == status }
+        _mainViewState.update { it.copy(statusFilteredBooks = filteredBooks) }
     }
 
     fun updateSelectedGenres(genres: List<String>) {
@@ -76,7 +75,6 @@ class MainViewModel(
         }
         _mainViewState.update { it.copy(selectedBooksForGenres = selectedBooks) }
     }
-
 
 
     fun saveBookAndImage(book: Book): Long {
@@ -94,7 +92,6 @@ class MainViewModel(
                     input.copyTo(output)
                 }
             }
-            println("image is saved")
             val imagePath = file.absolutePath
             book.cover = imagePath
             clearSelectedImageURI()
@@ -102,10 +99,8 @@ class MainViewModel(
         clearSelectedImageURI()
         runBlocking {
             insertedId = dao.insertBook(book)
-            println("Saved book ID: $insertedId")
             updateImageURI(Uri.parse(""))
         }
-
         return insertedId
 
 
@@ -146,10 +141,26 @@ class MainViewModel(
 
                 clearSelectedImageURI()
             }
-
             dao.updateBook(editedBook)
+            selectBookDetails(editedBook.id)
+            dismissChangeStatusDialog()
             updateImageURI(Uri.parse(""))
         }
+    }
+    fun openChangeStatusDialog() {
+        _mainViewState.update { it.copy(showChangeStatusDialog = true) }
+    }
+
+    fun dismissChangeStatusDialog() {
+        _mainViewState.update { it.copy(showChangeStatusDialog = false) }
+    }
+
+    fun openDeleteDialog() {
+        _mainViewState.update { it.copy(showDeleteDialog = true) }
+    }
+
+    fun dismissDeleteDialog() {
+        _mainViewState.update { it.copy(showDeleteDialog = false) }
     }
 
     fun deleteBook(book: Book) {

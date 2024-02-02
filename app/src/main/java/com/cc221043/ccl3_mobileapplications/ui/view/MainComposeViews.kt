@@ -1,57 +1,37 @@
 package com.cc221043.ccl3_mobileapplications.ui.view
 
-import android.net.Uri
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -65,15 +45,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.text.input.ImeAction
@@ -82,25 +59,17 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import coil.compose.AsyncImage
 import com.cc221043.ccl3_mobileapplications.R
-import com.cc221043.ccl3_mobileapplications.data.model.Book
 import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
-import com.cc221043.ccl3_mobileapplications.data.BookDao
 import com.cc221043.ccl3_mobileapplications.ui.view_model.OnboardingViewModel
 import kotlinx.coroutines.delay
 
@@ -122,12 +91,7 @@ fun MainView(
     val state = mainViewModel.mainViewState.collectAsState()
     val navController = rememberNavController()
 
-    observeOnboardingCompletion(onboardingViewModel, navController)
     val onboardingCompleted by onboardingViewModel.onboardingCompleted.collectAsState()
-    if (onboardingCompleted) {
-        navController.navigate(Screen.Home.route)
-    }
-
 
     Scaffold(
         topBar = {
@@ -136,15 +100,14 @@ fun MainView(
                     HomeTopBar()
                 }
                 is Screen.Onboarding -> {
+                    HomeTopBar()
                 }
                 is Screen.AddBook -> {
                     AddBookTopBar(mainViewModel, navController)
                 }
-
                 is Screen.EditBook -> {
                     EditBookTopBar(mainViewModel, navController)
                 }
-
                 is Screen.BookDetails -> {
                     BookDetailsTopBar(mainViewModel, navController)
                 }
@@ -175,12 +138,15 @@ fun MainView(
                     onPickImage = { pickImageLauncher.launch("image/*") })
             }
             composable("${Screen.BookDetails.route}/{bookId}") { backStackEntry ->
+                val bookId = backStackEntry.arguments?.getString("bookId")?.toIntOrNull() ?: -1
                 mainViewModel.selectedScreen(Screen.BookDetails)
-                val arguments = requireNotNull(backStackEntry.arguments)
-                val bookId = arguments.getString("bookId")!!.toInt()
-
                 mainViewModel.selectBookDetails(bookId)
-                BookDetails(mainViewModel, navController, bookId)
+
+                BookDetails(
+                    mainViewModel = mainViewModel,
+                    navController = navController,
+                    bookId = bookId
+                )
             }
             composable(Screen.EditBook.route + "/{bookId}") { backStackEntry ->
                 mainViewModel.selectedScreen(Screen.EditBook)
@@ -198,30 +164,13 @@ fun MainView(
     }
 }
 
-@Composable
-private fun observeOnboardingCompletion(
-    onboardingViewModel: OnboardingViewModel,
-    navController: NavController
-) {
-    val onboardingCompleted by onboardingViewModel.onboardingCompleted.collectAsState()
-
-    if (onboardingCompleted) {
-        LaunchedEffect(navController) {
-            navController.navigate(Screen.Home.route)
-        }
-    } else {
-        LaunchedEffect(navController) {
-            navController.navigate(Screen.Onboarding.route)
-        }
-    }
-}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
     val buttonColors = ButtonDefaults.buttonColors(
         contentColor = Colors.OffWhite,
-        containerColor = Colors.PrimaryBlueDark,
+        containerColor = Colors.PrimaryBlue,
         disabledContentColor = Colors.OffWhite,
         disabledContainerColor = Colors.Blue0,
     )
@@ -229,8 +178,6 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             var tabIndex by remember { mutableIntStateOf(0) }
-            var flag by remember { mutableStateOf(false) }
-            var flag2 by remember { mutableStateOf(false) }
             val pagerState = rememberPagerState { 2 }
 
             LaunchedEffect(tabIndex) {
@@ -257,31 +204,15 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
                     selected = tabIndex == 0,
                     onClick = {
                         tabIndex = 0
-                        flag = true
                     }
                 )
                 Tab(text = { Text("Genres", style = MaterialTheme.typography.displaySmall) },
                     selected = tabIndex == 1,
                     onClick = {
                         tabIndex = 1
-                        flag2 = true
                     }
                 )
             }
-            when (tabIndex) {
-                0 -> { if (flag) {
-                    mainViewModel.getAllBooks()
-                        flag = false
-                    }
-                }
-
-                1 -> { if (flag2) {
-                        mainViewModel.getAllBooks()
-                        flag2 = false
-                    }
-                }
-            }
-
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier
@@ -321,9 +252,21 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
 fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavController) {
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
     val state = mainViewModel.mainViewState.collectAsState()
-    var searchText by rememberSaveable { mutableStateOf("") }
 
-    val books = if(searchText == "") state.value.books else state.value.searchedBooks
+    var searchText by rememberSaveable { mutableStateOf("") }
+    var statusSearch by rememberSaveable { mutableStateOf("") }
+
+    val initialBooks = if(searchText == "") state.value.books else state.value.searchedBooks
+    val books = if(searchText == "" && statusSearch == "") state.value.books else if(searchText != "" && statusSearch == "") state.value.searchedBooks else state.value.statusFilteredBooks
+
+    LaunchedEffect(initialBooks) {
+        mainViewModel.changeStatusFilteredBooks(initialBooks, statusSearch)
+    }
+    LaunchedEffect(statusSearch) {
+        mainViewModel.changeStatusFilteredBooks(initialBooks, statusSearch)
+    }
+
+    val statusOptions = listOf("Not started", "In Progress", "Finished")
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -393,7 +336,54 @@ fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavControlle
                     }
                 ),
             )
-            BookGrid(navController, books)
+            Row (
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 6.dp, end = 14.dp, start = 14.dp)
+                    .horizontalScroll(
+                        rememberScrollState()
+                    ),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ){
+                statusOptions.forEach {option ->
+                    Button(
+                        onClick = {
+                            if(statusSearch != option) {
+                                statusSearch = option
+                            } else {
+                                statusSearch = ""
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (statusSearch == option) Colors.PrimaryBlue else Colors.Blue3,
+                            contentColor = Colors.OffWhite
+                        ),
+                        border = if(statusSearch == option) BorderStroke(2.dp, Color.Transparent) else BorderStroke(2.dp, Colors.PrimaryBlue),
+                    ) {
+                        Text(option)
+                    }
+                }
+            }
+            if (state.value.books.isEmpty()) {
+                Image(
+                    painter = painterResource(id = R.drawable.barry_bored),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp)
+                )
+                Text(
+                    text = "No books yet. Try adding a book so Barry has something to read.",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    style = MaterialTheme.typography.displayMedium,
+                    textAlign = TextAlign.Center,
+                    color = Colors.Blue5
+                )
+            } else {
+                BookGrid(navController, books)
+            }
         }
     }
 }
@@ -402,9 +392,9 @@ fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavControlle
 fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel) {
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
     val genreArray = stringArrayResource(id = R.array.genres)
-    var selectedNames by remember { mutableStateOf(emptyList<String>()) }
+    var selectedGenres by rememberSaveable { mutableStateOf(emptyList<String>()) }
     val state = mainViewModel.mainViewState.collectAsState()
-    val books = if(selectedNames.isEmpty()) state.value.booksForGenres else state.value.selectedBooksForGenres
+    val books = if(selectedGenres.isEmpty()) state.value.booksForGenres else state.value.selectedBooksForGenres
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -425,20 +415,41 @@ fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel)
                 items(genreArray) { name ->
                     GenreButton(
                         name = name,
-                        isSelected = selectedNames.contains(name),
+                        isSelected = selectedGenres.contains(name),
                         onNameClicked = {
-                            selectedNames = if (selectedNames.contains(name)) {
-                                selectedNames - name
+                            selectedGenres = if (selectedGenres.contains(name)) {
+                                selectedGenres - name
                             } else {
-                                selectedNames + name
+                                selectedGenres + name
                             }
-                            println(selectedNames)
-                            mainViewModel.updateSelectedGenres(selectedNames)
+                            println(selectedGenres)
+                            mainViewModel.updateSelectedGenres(selectedGenres)
                         }
                     )
                 }
             }
-            BookGrid(navController, books)
+            Text(textAlign = TextAlign.Start, modifier = Modifier.fillMaxWidth().padding(top = 6.dp, start = 14.dp, end = 14.dp), text = "Genres: ${selectedGenres.joinToString()}", fontSize = 14.sp, color = Colors.Blue5)
+
+            if (state.value.booksForGenres.isEmpty()) {
+                Image(
+                    painter = painterResource(id = R.drawable.barry_bored),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp)
+                )
+                Text(
+                    text = "No books yet. Try adding a book so Barry has something to read.",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    style = MaterialTheme.typography.displayMedium,
+                    textAlign = TextAlign.Center,
+                    color = Colors.Blue5
+                )
+            } else {
+                BookGrid(navController, books)
+            }
         }
     }
 }
@@ -567,7 +578,6 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
                             .padding(vertical = 8.dp)
                             .fillMaxWidth()
                     )
-
                 }
                 4 -> {
                     Image(

@@ -91,68 +91,6 @@ fun GenreButton(name: String, isSelected: Boolean, onNameClicked: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SearchBar(mainViewModel: MainViewModel) {
-    var searchText by rememberSaveable { mutableStateOf("") }
-    TextField(
-        textStyle = MaterialTheme.typography.bodySmall,
-        singleLine = true,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 20.dp, end = 14.dp, start = 14.dp)
-            .shadow(shape = CircleShape, elevation = 6.dp)
-            .border(BorderStroke(2.dp, color = Colors.Blue4), shape = CircleShape),
-        colors = TextFieldDefaults.textFieldColors(
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            containerColor = Colors.Blue1,
-            focusedLeadingIconColor = Colors.OffWhite,
-            textColor = Colors.OffWhite,
-            unfocusedLeadingIconColor = Colors.Blue5,
-            focusedTrailingIconColor = Colors.OffWhite,
-            placeholderColor = Colors.Blue5
-        ),
-        shape = CircleShape,
-        value = searchText,
-        onValueChange = {
-            searchText = it
-            mainViewModel.getBooksBySearch(searchText)
-        },
-        placeholder = { Text("Search") },
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = null
-            )
-        },
-        trailingIcon = {
-            if (searchText.isNotEmpty()) {
-                IconButton(
-                    onClick = {
-                        searchText = ""
-                        mainViewModel.resetSearch()
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = null
-                    )
-                }
-            }
-        },
-        keyboardOptions = KeyboardOptions.Default.copy(
-            imeAction = ImeAction.Search
-        ),
-        keyboardActions = KeyboardActions(
-            onSearch = {
-                mainViewModel.getBooksBySearch(searchText)
-            }
-        ),
-    )
-}
-
-
 @Composable
 fun BookGrid(navController: NavController, books: List<Book>) {
     Column (modifier = Modifier.fillMaxSize()) {
@@ -212,7 +150,7 @@ fun RatingBar(
                 ),
                 contentDescription = null,
                 modifier = if (small) Modifier
-                    .size(30.dp)
+                    .size(40.dp)
                     .clickable { onRatingChanged(i) } else Modifier
                     .size(50.dp)
                     .clickable { onRatingChanged(i) },

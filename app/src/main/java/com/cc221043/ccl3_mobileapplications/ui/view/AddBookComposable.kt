@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -90,7 +91,7 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
     )
     val buttonColors = ButtonDefaults.buttonColors(
         contentColor = Colors.OffWhite,
-        containerColor = Colors.PrimaryBlueDark,
+        containerColor = Colors.PrimaryBlue,
         disabledContentColor = Colors.OffWhite,
         disabledContainerColor = Colors.Blue0,
     )
@@ -117,9 +118,12 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
             mutableStateOf("")
         }
 
+        var options = listOf("Not started", "In Progress", "Finished")
+
         val context = LocalContext.current
 
         TextField(
+            singleLine = true,
             colors = inputFieldColors,
             shape = CircleShape,
             modifier = Modifier
@@ -129,10 +133,11 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                 .border(BorderStroke(2.dp, color = Colors.PrimaryBlue), shape = CircleShape),
             value = title,
             onValueChange = { newText -> title = newText },
-            label = { Text(text = "Title", modifier = Modifier.padding(horizontal = 12.dp), fontSize = 14.sp)
+            label = { Text(text = "Title", modifier = Modifier.padding(horizontal = 6.dp), fontSize = 14.sp)
             })
 
         TextField(
+            singleLine = true,
             colors = inputFieldColors,
             shape = CircleShape,
             modifier = Modifier
@@ -142,150 +147,101 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                 .border(BorderStroke(2.dp, color = Colors.PrimaryBlue), shape = CircleShape),
             value = author,
             onValueChange = { newText -> author = newText },
-            label = { Text(text = "Author (optional)", modifier = Modifier.padding(horizontal = 12.dp), fontSize = 14.sp) })
+            label = { Text(text = "Author (optional)", modifier = Modifier.padding(horizontal = 6.dp), fontSize = 14.sp) })
 
         Row (
             modifier = Modifier.padding(bottom = 20.dp)
         ){
-            Box(modifier = Modifier
-                .fillMaxWidth(0.4f)
-                .height(200.dp)
-                .background(Colors.Blue5, RoundedCornerShape(8.dp))
-                .border(BorderStroke(2.dp, Colors.PrimaryBlue), RoundedCornerShape(8.dp)),
-                contentAlignment = Alignment.Center) {
-                if (state.value.selectedImageURI != null) {
-                    AsyncImage(
-                        model = state.value.selectedImageURI,
-                        contentDescription = null,
+            Column {
+                Text(modifier = Modifier.padding(start= 6.dp), text = "Cover Image", fontSize = 14.sp, color = Colors.Blue5)
+                Box(modifier = Modifier
+                    .fillMaxWidth(0.4f)
+                    .height(200.dp)
+                    .background(Colors.Blue5, RoundedCornerShape(8.dp))
+                    .border(BorderStroke(2.dp, Colors.PrimaryBlue), RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center) {
+                    if (state.value.selectedImageURI != null) {
+                        AsyncImage(
+                            model = state.value.selectedImageURI,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    IconButton(
+                        onClick = { onPickImage() },
                         modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(8.dp)),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                IconButton(
-                    onClick = { onPickImage() },
-                    modifier = Modifier
-                        .border(BorderStroke(4.dp, Colors.PrimaryBlue), shape = CircleShape)
-                        .background(color = Colors.Blue3, shape = CircleShape)
-                        .padding(6.dp)
-                        .shadow(4.dp, shape = CircleShape), // Apply CircleShape here
-                    colors = iconButtonColors
-                ) {
-                    if (state.value.selectedImageURI == Uri.parse("")) {
-                        Icon(
-                            painterResource(id = R.drawable.upload),
-                            contentDescription = null,
-                            tint = Colors.Blue6,
-                            modifier = Modifier.size(30.dp)
-                        )
-                    } else {
-                        Icon(
-                            painterResource(id = R.drawable.update),
-                            contentDescription = null,
-                            tint = Colors.Blue6,
-                            modifier = Modifier.size(30.dp)
-                        )
+                            .border(BorderStroke(4.dp, Colors.PrimaryBlue), shape = CircleShape)
+                            .background(color = Colors.Blue3, shape = CircleShape)
+                            .padding(6.dp)
+                            .shadow(4.dp, shape = CircleShape), // Apply CircleShape here
+                        colors = iconButtonColors
+                    ) {
+                        if (state.value.selectedImageURI == Uri.parse("")) {
+                            Icon(
+                                painterResource(id = R.drawable.upload),
+                                contentDescription = null,
+                                tint = Colors.Blue6,
+                                modifier = Modifier.size(30.dp)
+                            )
+                        } else {
+                            Icon(
+                                painterResource(id = R.drawable.update),
+                                contentDescription = null,
+                                tint = Colors.Blue6,
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
                     }
                 }
             }
             Spacer(modifier = Modifier.size(14.dp))
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            Column( modifier = Modifier.fillMaxWidth()) {
                 Text(modifier = Modifier.padding(start= 14.dp), text = "Reading Status", fontSize = 14.sp, color = Colors.Blue5)
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(BorderStroke(2.dp, Colors.PrimaryBlue), CircleShape),
-                    onClick = {
-                        status = "Not started"
-                        rating = 0
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if(status == "Not started") Colors.PrimaryBlueDark else Colors.Blue3,
-                        contentColor = Colors.OffWhite,
-                        disabledContainerColor = Colors.Blue3,
-                        disabledContentColor = Colors.OffWhite,
-                    )
-                ) {
-                    Row (
+                options.forEach {option ->
+                    Button(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ){
-                        Icon(
-                            painterResource(id = R.drawable.slash),
-                            contentDescription = null,
-                            tint = Colors.OffWhite
-                        )
-                        Spacer(modifier = Modifier.size(6.dp))
-                        Text(text = "Not started", style = MaterialTheme.typography.bodySmall)
-                    }
-                }
-                Spacer(modifier = Modifier.size(12.dp))
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(BorderStroke(2.dp, Colors.PrimaryBlue), CircleShape),
-                    onClick = {
-                        status = "In Progress"
-                        rating = 0
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if(status == "In Progress") Colors.PrimaryBlueDark else Colors.Blue3,
-                        contentColor = Colors.OffWhite,
-                        disabledContainerColor = Colors.Blue3,
-                        disabledContentColor = Colors.OffWhite,
-                    )) {
-                    Row (
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ){
-                        Icon(
-                            painterResource(id = R.drawable.clock),
-                            contentDescription = null,
-                            tint = Colors.OffWhite)
-                        Spacer(modifier = Modifier.size(6.dp))
-                        Text(text = "In Progress", style = MaterialTheme.typography.bodySmall)
-                    }
-                }
-                Spacer(modifier = Modifier.size(12.dp))
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(BorderStroke(2.dp, Colors.PrimaryBlue), CircleShape),
-                    onClick = {
-                        status = "Finished"
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if(status == "Finished") Colors.PrimaryBlueDark else Colors.Blue3,
-                        contentColor = Colors.OffWhite,
-                        disabledContainerColor = Colors.Blue3,
-                        disabledContentColor = Colors.OffWhite,
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
+                        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp),
+                        border = if(status == option) BorderStroke(2.dp, Color.Transparent) else BorderStroke(2.dp, Colors.PrimaryBlue),
+                                onClick = {
+                            status = option
+                            if (option == "Not started" || option == "Finished") {
+                                rating = 0
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (status == option) Colors.PrimaryBlue else Colors.Blue1,
+                            contentColor = Colors.OffWhite
+                        ),
                     ) {
-                        Icon(
-                            painterResource(id = R.drawable.checkcircle),
-                            contentDescription = null,
-                            tint = Colors.OffWhite)
-                        Spacer(modifier = Modifier.size(6.dp))
-                        Text(text = "Finished", style = MaterialTheme.typography.bodySmall)
+                        Row (
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start
+                        ){
+                            Icon(
+                                painterResource(id =
+                                    if(option == "Not started") R.drawable.slash else if(option == "In Progress") R.drawable.clock else R.drawable.checkcircle
+                                ),
+                                contentDescription = null,
+                                tint = Colors.OffWhite
+                            )
+                            Spacer(modifier = Modifier.size(6.dp))
+                            Text(text = option, style = MaterialTheme.typography.bodySmall)
+                        }
                     }
+                    Spacer(Modifier.size(12.dp))
                 }
             }
         }
+
         if (status == "Finished") {
             Box(modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 20.dp)
-                .background(Colors.Blue3, RoundedCornerShape(14.dp))) {
+                .background(Colors.Blue1, RoundedCornerShape(14.dp))) {
                 Column (
                     modifier = Modifier
                         .fillMaxWidth()
@@ -312,6 +268,7 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
         }
 
         TextField(
+            singleLine = true,
             colors = inputFieldColors,
             shape = CircleShape,
             modifier = Modifier
@@ -321,19 +278,23 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                 .border(BorderStroke(2.dp, color = Colors.PrimaryBlue), shape = CircleShape),
             value = platformat,
             onValueChange = { newText -> platformat = newText },
-            label = { Text(text = "Platform/Format (optional)", modifier = Modifier.padding(horizontal = 12.dp), fontSize = 14.sp) })
+            label = { Text(text = "Platform/Format (optional)", modifier = Modifier.padding(horizontal = 6.dp), fontSize = 14.sp) })
 
         TextField(
+            maxLines = 6,
             colors = inputFieldColors,
-            shape = CircleShape,
+            shape = RoundedCornerShape(24.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 20.dp)
-                .shadow(shape = CircleShape, elevation = 6.dp)
-                .border(BorderStroke(2.dp, color = Colors.PrimaryBlue), shape = CircleShape),
+                .shadow(shape = RoundedCornerShape(28.dp), elevation = 6.dp)
+                .border(
+                    BorderStroke(2.dp, color = Colors.PrimaryBlue),
+                    shape = RoundedCornerShape(28.dp)
+                ),
             value = synopsis,
             onValueChange = { newText -> synopsis = newText },
-            label = { Text(text = "Synopsis (optional)", modifier = Modifier.padding(horizontal = 12.dp), fontSize = 14.sp) })
+            label = { Text(text = "Synopsis (optional)", modifier = Modifier.padding(horizontal = 6.dp), fontSize = 14.sp) })
 
         Text(modifier = Modifier.padding(start= 14.dp), text = "Genres: $genresString", fontSize = 14.sp, color = Colors.Blue5)
 
@@ -354,7 +315,9 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
             }
         }
 
-        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)) {
+        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 20.dp)) {
             Button(
                 colors = ButtonDefaults.buttonColors(
                     contentColor = Colors.OffWhite,
@@ -393,6 +356,5 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                 Text(text = "Save book", style = MaterialTheme.typography.bodySmall)
             }
         }
-
     }
 }

@@ -23,14 +23,11 @@ interface BookDao {
     fun getAllBooks(): Flow<List<Book>>
 
     @Query("SELECT * FROM books WHERE id = :id")
-    fun getBookById(id: Int): Flow<Book>
+    fun getBookById(id: Int): Flow<Book?>
 
     @Query("SELECT * FROM books WHERE LOWER(title) LIKE LOWER('%' || :searchText || '%')")
     fun getBooksBySearch(searchText: String): Flow<List<Book>>
 
     @Query("SELECT * FROM books WHERE genres IN (:genreQuery)")
     fun getBooksByGenres(genreQuery: List<String>): Flow<List<Book>>
-
-    @Query("SELECT * FROM books WHERE status = :status")
-    fun getBooksByStatus(status: String): Flow<List<Book>>
 }

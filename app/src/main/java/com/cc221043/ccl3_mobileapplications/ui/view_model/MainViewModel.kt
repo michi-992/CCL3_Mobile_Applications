@@ -14,6 +14,7 @@ import com.cc221043.ccl3_mobileapplications.ui.view.Screen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -70,12 +71,7 @@ class MainViewModel(
             book.genres.containsAll(genres)
         }
         _mainViewState.update { it.copy(selectedBooksForGenres = selectedBooks) }
-        print("genres ")
-        println(genres)
-        print("Selected Book for genres ")
-        println(_mainViewState.value.selectedBooksForGenres)
     }
-
 
 
     fun saveBookAndImage(book: Book): Long {
@@ -93,7 +89,6 @@ class MainViewModel(
                     input.copyTo(output)
                 }
             }
-            println("image is saved")
             val imagePath = file.absolutePath
             book.cover = imagePath
             clearSelectedImageURI()
@@ -101,7 +96,6 @@ class MainViewModel(
         clearSelectedImageURI()
         runBlocking {
             insertedId = dao.insertBook(book)
-            println("Saved book ID: $insertedId")
             updateImageURI(Uri.parse(""))
         }
 
@@ -120,8 +114,9 @@ class MainViewModel(
 
     fun selectBookDetails(id: Int) {
         viewModelScope.launch {
-            val book = dao.getBookById(id)
-            _mainViewState.update { it.copy(selectedBook = book) }
+            dao.getBookById(id).take(1).collect() {book ->
+                _mainViewState.update { it.copy(selectedBook = book) }
+            }
         }
     }
 
@@ -144,20 +139,23 @@ class MainViewModel(
 
                 clearSelectedImageURI()
             }
-
             dao.updateBook(editedBook)
+            selectBookDetails(editedBook.id)
+            dismissChangeStatusDialog()
             updateImageURI(Uri.parse(""))
         }
+    }
+    fun openChangeStatusDialog() {
+        _mainViewState.update { it.copy(showChangeStatusDialog = true) }
+    }
+
+    fun dismissChangeStatusDialog() {
+        _mainViewState.update { it.copy(showChangeStatusDialog = false) }
     }
 
     fun deleteBook(book: Book) {
         viewModelScope.launch {
-            try {
-                dao.deleteBook(book)
-                println("Book deleted successfully")
-            } catch (e: Exception) {
-                println("Error deleting book: ${e.message}")
-            }
+            dao.deleteBook(book)
         }
     }
 }

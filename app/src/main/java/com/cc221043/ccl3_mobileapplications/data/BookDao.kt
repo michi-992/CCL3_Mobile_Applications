@@ -23,7 +23,7 @@ interface BookDao {
     fun getAllBooks(): Flow<List<Book>>
 
     @Query("SELECT * FROM books WHERE id = :id")
-    suspend fun getBookById(id: Int): Book?
+    fun getBookById(id: Int): Flow<Book?>
 
     @Query("SELECT * FROM books WHERE LOWER(title) LIKE LOWER('%' || :searchText || '%')")
     fun getBooksBySearch(searchText: String): Flow<List<Book>>

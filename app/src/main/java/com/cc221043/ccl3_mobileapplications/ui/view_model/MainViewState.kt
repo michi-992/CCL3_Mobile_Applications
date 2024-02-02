@@ -13,5 +13,5 @@ data class MainViewState (
     val selectedImageURI: Uri = Uri.parse(""),
     val selectedBook: Book? = null,
     val previousScreen: String = "",
-    val test: List<Book> = emptyList(),
+    val showChangeStatusDialog: Boolean = false
 )

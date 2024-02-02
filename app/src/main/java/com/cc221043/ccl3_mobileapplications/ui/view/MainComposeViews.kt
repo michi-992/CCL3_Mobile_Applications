@@ -88,7 +88,7 @@ fun MainView(
     val state = mainViewModel.mainViewState.collectAsState()
     val navController = rememberNavController()
 
-    observeOnboardingCompletion(onboardingViewModel, navController)
+//    observeOnboardingCompletion(onboardingViewModel, navController)
     val onboardingCompleted by onboardingViewModel.onboardingCompleted.collectAsState()
     if (onboardingCompleted) {
         navController.navigate(Screen.Home.route)
@@ -114,9 +114,7 @@ fun MainView(
                     BookDetailsTopBar(
                         mainViewModel,
                         navController
-                    ) {
-                        navController.navigate("${Screen.EditBook.route}/${state.value.selectedBook?.id ?: -1}")
-                    }
+                    )
                 }
             }
         }
@@ -149,16 +147,6 @@ fun MainView(
 
                 mainViewModel.selectedScreen(Screen.BookDetails)
                 mainViewModel.selectBookDetails(bookId)
-
-                val onEditClick: () -> Unit = {
-                    navController.navigate("${Screen.EditBook.route}/$bookId")
-                }
-
-                BookDetailsTopBar(
-                    mainViewModel = mainViewModel,
-                    navController = navController,
-                    onEditClick = onEditClick
-                )
 
                 BookDetails(
                     mainViewModel = mainViewModel,
@@ -377,7 +365,26 @@ fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavControlle
                     }
                 ),
             )
-            BookGrid(navController, books)
+            if (state.value.books.isEmpty()) {
+                Image(
+                    painter = painterResource(id = R.drawable.barry_bored),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp)
+                )
+                Text(
+                    text = "No books yet. Try adding a book so Barry has something to read.",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                    color = Colors.Blue5
+                )
+            } else {
+                BookGrid(navController, books)
+            }
         }
     }
 }
@@ -388,7 +395,7 @@ fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel)
     val genreArray = stringArrayResource(id = R.array.genres)
     var selectedNames by remember { mutableStateOf(emptyList<String>()) }
     val state = mainViewModel.mainViewState.collectAsState()
-    val books = if(state.value.selectedBooksForGenres.isEmpty() && selectedNames.isEmpty()) state.value.booksForGenres else state.value.selectedBooksForGenres
+    val books = if(selectedNames.isEmpty()) state.value.booksForGenres else state.value.selectedBooksForGenres
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -422,7 +429,26 @@ fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel)
                     )
                 }
             }
-            BookGrid(navController, books)
+            if (state.value.booksForGenres.isEmpty()) {
+                Image(
+                    painter = painterResource(id = R.drawable.barry_bored),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp)
+                )
+                Text(
+                    text = "No books yet. Try adding a book so Barry has something to read.",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                    color = Colors.Blue5
+                )
+            } else {
+                BookGrid(navController, books)
+            }
         }
     }
 }

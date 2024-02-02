@@ -150,7 +150,7 @@ fun RatingBar(
                 ),
                 contentDescription = null,
                 modifier = if (small) Modifier
-                    .size(30.dp)
+                    .size(40.dp)
                     .clickable { onRatingChanged(i) } else Modifier
                     .size(50.dp)
                     .clickable { onRatingChanged(i) },

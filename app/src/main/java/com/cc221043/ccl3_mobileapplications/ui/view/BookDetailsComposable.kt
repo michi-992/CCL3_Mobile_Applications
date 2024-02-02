@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -234,7 +235,7 @@ fun DeleteDialog(mainViewModel: MainViewModel, navController: NavController) {
     val state = mainViewModel.mainViewState.collectAsState()
     val book = state.value.selectedBook ?: return
 
-    val backgroundColor = Colors.Blue0.copy(alpha = 0.5f)
+    val backgroundColor = Colors.Blue0.copy(alpha = 0.8f)
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -291,7 +292,10 @@ fun StatusChangeDialog(mainViewModel: MainViewModel) {
         mutableStateOf(book.status)
     }
     var rating by remember { mutableStateOf(book.rating) }
-    val backgroundColor = Colors.Blue0.copy(alpha = 0.5f)
+    val backgroundColor = Colors.Blue0.copy(alpha = 0.8f)
+
+    var options = listOf("Not started", "In Progress", "Finished")
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -308,104 +312,49 @@ fun StatusChangeDialog(mainViewModel: MainViewModel) {
             content = {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth(0.98f)
-                        .background(Colors.Blue0, RoundedCornerShape(20.dp))
-                        .border(BorderStroke(2.dp, Colors.PrimaryBlue))
-                        .padding(14.dp)
+                        .fillMaxWidth()
+                        .background(Colors.Blue1, RoundedCornerShape(20.dp))
+                        .padding(20.dp)
                 ) {
                     Text(
-                        modifier = Modifier.padding(start = 14.dp),
-                        text = "Reading Status",
-                        fontSize = 14.sp,
+                        modifier = Modifier.padding(bottom = 14.dp),
+                        text = "Change Reading Status",
+                        style = MaterialTheme.typography.displayMedium,
                         color = Colors.Blue5
                     )
-                    Button(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(BorderStroke(2.dp, Colors.PrimaryBlue), CircleShape),
-                        onClick = {
-                            status = "Not started"
-                            rating = 0
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (status == "Not started") Colors.PrimaryBlueDark else Colors.Blue3,
-                            contentColor = Colors.OffWhite,
-                            disabledContainerColor = Colors.Blue3,
-                            disabledContentColor = Colors.OffWhite,
-                        )
-                    ) {
-                        Row(
+                    options.forEach {option ->
+                        Button(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Start
+                            contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp),
+                            border = if(status == option) BorderStroke(2.dp, Color.Transparent) else BorderStroke(2.dp, Colors.PrimaryBlue),
+                            onClick = {
+                                status = option
+                                if (option == "Not started" || option == "Finished") {
+                                    rating = 0
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (status == option) Colors.PrimaryBlue else Colors.Blue1,
+                                contentColor = Colors.OffWhite
+                            ),
                         ) {
-                            Icon(
-                                painterResource(id = R.drawable.slash),
-                                contentDescription = null,
-                                tint = Colors.OffWhite
-                            )
-                            Spacer(modifier = Modifier.size(6.dp))
-                            Text(text = "Not started", style = MaterialTheme.typography.bodySmall)
+                            Row (
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Start
+                            ){
+                                Icon(
+                                    painterResource(id =
+                                    if(option == "Not started") R.drawable.slash else if(option == "In Progress") R.drawable.clock else R.drawable.checkcircle
+                                    ),
+                                    contentDescription = null,
+                                    tint = Colors.OffWhite
+                                )
+                                Spacer(modifier = Modifier.size(6.dp))
+                                Text(text = option, style = MaterialTheme.typography.bodySmall)
+                            }
                         }
-                    }
-                    Spacer(modifier = Modifier.size(12.dp))
-                    Button(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(BorderStroke(2.dp, Colors.PrimaryBlue), CircleShape),
-                        onClick = {
-                            status = "In Progress"
-                            rating = 0
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (status == "In Progress") Colors.PrimaryBlueDark else Colors.Blue3,
-                            contentColor = Colors.OffWhite,
-                            disabledContainerColor = Colors.Blue3,
-                            disabledContentColor = Colors.OffWhite,
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-                            Icon(
-                                painterResource(id = R.drawable.clock),
-                                contentDescription = null,
-                                tint = Colors.OffWhite
-                            )
-                            Spacer(modifier = Modifier.size(6.dp))
-                            Text(text = "In Progress", style = MaterialTheme.typography.bodySmall)
-                        }
-                    }
-                    Spacer(modifier = Modifier.size(12.dp))
-                    Button(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(BorderStroke(2.dp, Colors.PrimaryBlue), CircleShape),
-                        onClick = {
-                            status = "Finished"
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (status == "Finished") Colors.PrimaryBlueDark else Colors.Blue3,
-                            contentColor = Colors.OffWhite,
-                            disabledContainerColor = Colors.Blue3,
-                            disabledContentColor = Colors.OffWhite,
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-                            Icon(
-                                painterResource(id = R.drawable.checkcircle),
-                                contentDescription = null,
-                                tint = Colors.OffWhite
-                            )
-                            Spacer(modifier = Modifier.size(6.dp))
-                            Text(text = "Finished", style = MaterialTheme.typography.bodySmall)
-                        }
+                        Spacer(Modifier.size(12.dp))
                     }
                     if (status == "Finished") {
                         Box(
@@ -429,7 +378,7 @@ fun StatusChangeDialog(mainViewModel: MainViewModel) {
                                 RatingBar(
                                     rating = rating, onRatingChanged = { rating = it },
                                     modifier = Modifier.padding(bottom = 6.dp),
-                                    small = false
+                                    small = true
                                 )
                                 Text(
                                     modifier = Modifier
@@ -444,28 +393,45 @@ fun StatusChangeDialog(mainViewModel: MainViewModel) {
                             }
                         }
                     }
-                    Button(colors = ButtonDefaults.buttonColors(
-                        contentColor = Colors.OffWhite,
-                        containerColor = Colors.PrimaryBlue
-                    ),
-                        onClick = {
-                            val book = Book(
-                                id = book.id,
-                                title = book.title,
-                                author = book.author,
-                                platformat = book.platformat,
-                                rating = rating,
-                                synopsis = book.synopsis,
-                                status = status,
-                                cover = book.cover,
-                                genres = book.genres
-                            )
-
-                            mainViewModel.updateBookAndImage(book)
-                        }
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
                     ) {
-                        Text("Save")
+                        Button(
+                            onClick = { mainViewModel.dismissChangeStatusDialog() },
+                            border = BorderStroke(2.dp, Colors.PrimaryBlue),
+                            colors = ButtonDefaults.buttonColors(
+                                contentColor = Colors.OffWhite,
+                                containerColor = Color.Transparent
+                            )
+                        ) {
+                            Text("Cancel")
+                        }
+                        Spacer(Modifier.size(12.dp))
+                        Button(colors = ButtonDefaults.buttonColors(
+                            contentColor = Colors.OffWhite,
+                            containerColor = Colors.PrimaryBlue
+                        ),
+                            onClick = {
+                                val book = Book(
+                                    id = book.id,
+                                    title = book.title,
+                                    author = book.author,
+                                    platformat = book.platformat,
+                                    rating = rating,
+                                    synopsis = book.synopsis,
+                                    status = status,
+                                    cover = book.cover,
+                                    genres = book.genres
+                                )
+
+                                mainViewModel.updateBookAndImage(book)
+                            }
+                        ) {
+                            Text("Save")
+                        }
                     }
+
 
                 }
             }

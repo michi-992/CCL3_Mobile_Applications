@@ -69,6 +69,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import com.cc221043.ccl3_mobileapplications.ui.view_model.OnboardingViewModel
 import kotlinx.coroutines.delay
 
@@ -354,7 +355,7 @@ fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavControlle
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (statusSearch == option) Colors.PrimaryBlue else Color.Transparent,
+                            containerColor = if (statusSearch == option) Colors.PrimaryBlue else Colors.Blue3,
                             contentColor = Colors.OffWhite
                         ),
                         border = if(statusSearch == option) BorderStroke(2.dp, Color.Transparent) else BorderStroke(2.dp, Colors.PrimaryBlue),
@@ -376,7 +377,7 @@ fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavControlle
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.displayMedium,
                     textAlign = TextAlign.Center,
                     color = Colors.Blue5
                 )
@@ -391,9 +392,9 @@ fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavControlle
 fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel) {
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
     val genreArray = stringArrayResource(id = R.array.genres)
-    var selectedNames by remember { mutableStateOf(emptyList<String>()) }
+    var selectedGenres by rememberSaveable { mutableStateOf(emptyList<String>()) }
     val state = mainViewModel.mainViewState.collectAsState()
-    val books = if(selectedNames.isEmpty()) state.value.booksForGenres else state.value.selectedBooksForGenres
+    val books = if(selectedGenres.isEmpty()) state.value.booksForGenres else state.value.selectedBooksForGenres
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -414,19 +415,21 @@ fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel)
                 items(genreArray) { name ->
                     GenreButton(
                         name = name,
-                        isSelected = selectedNames.contains(name),
+                        isSelected = selectedGenres.contains(name),
                         onNameClicked = {
-                            selectedNames = if (selectedNames.contains(name)) {
-                                selectedNames - name
+                            selectedGenres = if (selectedGenres.contains(name)) {
+                                selectedGenres - name
                             } else {
-                                selectedNames + name
+                                selectedGenres + name
                             }
-                            println(selectedNames)
-                            mainViewModel.updateSelectedGenres(selectedNames)
+                            println(selectedGenres)
+                            mainViewModel.updateSelectedGenres(selectedGenres)
                         }
                     )
                 }
             }
+            Text(textAlign = TextAlign.Start, modifier = Modifier.fillMaxWidth().padding(top = 6.dp, start = 14.dp, end = 14.dp), text = "Genres: ${selectedGenres.joinToString()}", fontSize = 14.sp, color = Colors.Blue5)
+
             if (state.value.booksForGenres.isEmpty()) {
                 Image(
                     painter = painterResource(id = R.drawable.barry_bored),
@@ -440,7 +443,7 @@ fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel)
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.displayMedium,
                     textAlign = TextAlign.Center,
                     color = Colors.Blue5
                 )
@@ -575,7 +578,6 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
                             .padding(vertical = 8.dp)
                             .fillMaxWidth()
                     )
-
                 }
                 4 -> {
                     Image(

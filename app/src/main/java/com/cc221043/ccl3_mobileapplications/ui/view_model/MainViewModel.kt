@@ -101,7 +101,6 @@ class MainViewModel(
             insertedId = dao.insertBook(book)
             updateImageURI(Uri.parse(""))
         }
-
         return insertedId
 
 

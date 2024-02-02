@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
@@ -61,7 +62,8 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
     val state = mainViewModel.mainViewState.collectAsState()
     val book = state.value.selectedBook ?: return
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
-    val genreString = book.genres.joinToString().removePrefix("[").removePrefix(",").removeSuffix("]")
+    val genreString =
+        book.genres.joinToString().removePrefix("[").removePrefix(",").removeSuffix("]")
 
     Column(
         modifier = Modifier
@@ -70,18 +72,19 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(260.dp)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = gradientColors,
-                        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(240.dp)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = gradientColors,
                     )
-                    .padding(top = 20.dp),
-                contentAlignment = Alignment.BottomCenter
-            ) {Box(
+                )
+                .padding(top = 20.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
@@ -90,68 +93,92 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
                         shape = RoundedCornerShape(topStart = 60.dp, topEnd = 60.dp)
                     )
             )
-                AsyncImage(
-                    model = book.cover,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .width(154.dp)
-                        .height(240.dp)
-                        .clip(shape = RoundedCornerShape(8.dp))
-                        .background(Color.Gray)
-                )
+            AsyncImage(
+                model = book.cover,
+                contentDescription = null,
+                modifier = Modifier
+                    .width(154.dp)
+                    .height(240.dp)
+                    .clip(shape = RoundedCornerShape(8.dp))
+                    .background(Colors.Blue4),
+                contentScale = ContentScale.Crop
+            )
 
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = book.title, style = MaterialTheme.typography.displayMedium, color = Colors.OffWhite)
+        Text(
+            text = book.title,
+            style = MaterialTheme.typography.displayMedium,
+            color = Colors.OffWhite
+        )
 
-
-        if(book.author.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = book.author, style = MaterialTheme.typography.displayMedium, color = Colors.Blue5)
+        if (book.author.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = book.author,
+                style = MaterialTheme.typography.bodySmall,
+                color = Colors.Blue5
+            )
         }
 
-        Spacer(modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.size(24.dp))
         Row(
-            modifier = Modifier
-                .padding(vertical = 20.dp)
+            modifier = Modifier.padding(bottom = 12.dp)
                 .background(color = Colors.PrimaryBlueDark, shape = CircleShape)
                 .padding(horizontal = 10.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            if(book.status == "Finished") {
-                    Icon(
-                        painterResource(id = R.drawable.checkcircle),
-                        contentDescription = null,
-                        tint = Colors.OffWhite)
-                    Spacer(modifier = Modifier.size(6.dp))
-                    Text(text = "Finished", style = MaterialTheme.typography.bodyMedium, color = Colors.OffWhite)
-                } else if (book.status == "Not started") {
-                    Icon(
-                        painterResource(id = R.drawable.slash),
-                        contentDescription = null,
-                        tint = Colors.OffWhite
-                    )
-                    Spacer(modifier = Modifier.size(6.dp))
-                    Text(text = "Not started", style = MaterialTheme.typography.bodyMedium, color = Colors.OffWhite)
+            if (book.status == "Finished") {
+                Icon(
+                    painterResource(id = R.drawable.checkcircle),
+                    contentDescription = null,
+                    tint = Colors.OffWhite
+                )
+                Spacer(modifier = Modifier.size(6.dp))
+                Text(
+                    text = "Finished",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Colors.OffWhite
+                )
+            } else if (book.status == "Not started") {
+                Icon(
+                    painterResource(id = R.drawable.slash),
+                    contentDescription = null,
+                    tint = Colors.OffWhite
+                )
+                Spacer(modifier = Modifier.size(6.dp))
+                Text(
+                    text = "Not started",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Colors.OffWhite
+                )
 
-                } else if(book.status == "In Progress") {
-                    Icon(
-                        painterResource(id = R.drawable.clock),
-                        contentDescription = null,
-                        tint = Colors.OffWhite
-                    )
-                    Spacer(modifier = Modifier.size(6.dp))
-                    Text(text = "In Progress", style = MaterialTheme.typography.bodyMedium, color = Colors.OffWhite)
+            } else if (book.status == "In Progress") {
+                Icon(
+                    painterResource(id = R.drawable.clock),
+                    contentDescription = null,
+                    tint = Colors.OffWhite
+                )
+                Spacer(modifier = Modifier.size(6.dp))
+                Text(
+                    text = "In Progress",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Colors.OffWhite
+                )
             }
         }
+
         if (book.rating != 0 && book.status == "Finished") {
             RatingBar(rating = book.rating, onRatingChanged = {}, small = false)
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-            Spacer(modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.height(18.dp))
+
+        Column (
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+        ){
             Text(
                 text = "Genres",
                 style = MaterialTheme.typography.bodySmall,
@@ -160,41 +187,35 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
             Text(
                 text = genreString,
                 style = MaterialTheme.typography.bodyMedium,
-                color = Colors.Blue6
+                color = Colors.OffWhite
             )
+            Spacer(modifier = Modifier.height(18.dp))
 
-
-
-        Spacer(modifier = Modifier.height(8.dp))
-        if(book.platformat.isNotEmpty()) {
-            Spacer(modifier = Modifier.size(20.dp))
             Text(
                 text = "Platform/Format",
                 style = MaterialTheme.typography.bodySmall,
                 color = Colors.Blue5
             )
             Text(
-                text = book.platformat,
+                text = if(book.platformat.isNotEmpty()) book.platformat else "No Platform or Format was provided",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Colors.Blue6
+                color = if(book.platformat.isNotEmpty()) Colors.OffWhite else Colors.Blue6
             )
-        }
+            Spacer(modifier = Modifier.size(18.dp))
 
-
-        if(book.synopsis.isNotEmpty()) {
-            Spacer(modifier = Modifier.size(20.dp))
-
-            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Synopsis",
                 style = MaterialTheme.typography.bodySmall,
                 color = Colors.Blue5
             )
             Text(
-                text = book.synopsis,
+                text = if(book.synopsis.isNotEmpty()) book.synopsis else "No Synopsis was provided",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Colors.Blue6
+                color = if(book.platformat.isNotEmpty()) Colors.OffWhite else Colors.Blue6
             )
+
+            Spacer(modifier = Modifier.size(54.dp))
+
         }
     }
 
@@ -223,11 +244,12 @@ fun DeleteDialog(mainViewModel: MainViewModel, navController: NavController) {
     ) {
         AlertDialog(
             onDismissRequest = { mainViewModel.dismissDeleteDialog() },
-            title = { Text("Delete Book", style = MaterialTheme.typography.titleSmall) },
+            title = { Text("Delete Book", style = MaterialTheme.typography.displayMedium, color = Colors.Blue5) },
             text = {
                 Text(
                     "Are you sure you want to delete this book?",
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Colors.OffWhite
                 )
             },
             confirmButton = {
@@ -247,8 +269,7 @@ fun DeleteDialog(mainViewModel: MainViewModel, navController: NavController) {
             dismissButton = {
                 Button(
                     onClick = { mainViewModel.dismissDeleteDialog() },
-                    modifier = Modifier
-                        .border(BorderStroke(2.dp, Colors.PrimaryBlue), shape = CircleShape),
+                    border = BorderStroke(2.dp, Colors.PrimaryBlue),
                     colors = ButtonDefaults.buttonColors(
                         contentColor = Colors.OffWhite,
                         containerColor = Color.Transparent

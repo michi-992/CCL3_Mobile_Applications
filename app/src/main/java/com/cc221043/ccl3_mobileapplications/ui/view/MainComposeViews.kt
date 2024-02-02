@@ -6,6 +6,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,12 +63,12 @@ import com.cc221043.ccl3_mobileapplications.R
 import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.style.TextAlign
-import com.cc221043.ccl3_mobileapplications.data.model.Book
 import com.cc221043.ccl3_mobileapplications.ui.view_model.OnboardingViewModel
 import kotlinx.coroutines.delay
 
@@ -90,9 +91,6 @@ fun MainView(
     val navController = rememberNavController()
 
     val onboardingCompleted by onboardingViewModel.onboardingCompleted.collectAsState()
-    if (onboardingCompleted) {
-        navController.navigate(Screen.Home.route)
-    }
 
     Scaffold(
         topBar = {
@@ -101,20 +99,16 @@ fun MainView(
                     HomeTopBar()
                 }
                 is Screen.Onboarding -> {
+                    HomeTopBar()
                 }
                 is Screen.AddBook -> {
                     AddBookTopBar(mainViewModel, navController)
                 }
-
                 is Screen.EditBook -> {
                     EditBookTopBar(mainViewModel, navController)
                 }
-
                 is Screen.BookDetails -> {
-                    BookDetailsTopBar(
-                        mainViewModel,
-                        navController
-                    )
+                    BookDetailsTopBar(mainViewModel, navController)
                 }
             }
         }
@@ -144,7 +138,6 @@ fun MainView(
             }
             composable("${Screen.BookDetails.route}/{bookId}") { backStackEntry ->
                 val bookId = backStackEntry.arguments?.getString("bookId")?.toIntOrNull() ?: -1
-
                 mainViewModel.selectedScreen(Screen.BookDetails)
                 mainViewModel.selectBookDetails(bookId)
 
@@ -176,7 +169,7 @@ fun MainView(
 fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
     val buttonColors = ButtonDefaults.buttonColors(
         contentColor = Colors.OffWhite,
-        containerColor = Colors.PrimaryBlueDark,
+        containerColor = Colors.PrimaryBlue,
         disabledContentColor = Colors.OffWhite,
         disabledContainerColor = Colors.Blue0,
     )
@@ -184,8 +177,6 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             var tabIndex by remember { mutableIntStateOf(0) }
-            var flag by remember { mutableStateOf(false) }
-            var flag2 by remember { mutableStateOf(false) }
             val pagerState = rememberPagerState { 2 }
 
             LaunchedEffect(tabIndex) {
@@ -212,31 +203,15 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
                     selected = tabIndex == 0,
                     onClick = {
                         tabIndex = 0
-                        flag = true
                     }
                 )
                 Tab(text = { Text("Genres", style = MaterialTheme.typography.displaySmall) },
                     selected = tabIndex == 1,
                     onClick = {
                         tabIndex = 1
-                        flag2 = true
                     }
                 )
             }
-            when (tabIndex) {
-                0 -> { if (flag) {
-                    mainViewModel.getAllBooks()
-                        flag = false
-                    }
-                }
-
-                1 -> { if (flag2) {
-                        mainViewModel.getAllBooks()
-                        flag2 = false
-                    }
-                }
-            }
-
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier
@@ -282,7 +257,6 @@ fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavControlle
 
     val initialBooks = if(searchText == "") state.value.books else state.value.searchedBooks
     val books = if(searchText == "" && statusSearch == "") state.value.books else if(searchText != "" && statusSearch == "") state.value.searchedBooks else state.value.statusFilteredBooks
-
 
     LaunchedEffect(initialBooks) {
         mainViewModel.changeStatusFilteredBooks(initialBooks, statusSearch)
@@ -361,7 +335,15 @@ fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavControlle
                     }
                 ),
             )
-            Row {
+            Row (
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 6.dp, end = 14.dp, start = 14.dp)
+                    .horizontalScroll(
+                        rememberScrollState()
+                    ),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ){
                 statusOptions.forEach {option ->
                     Button(
                         onClick = {

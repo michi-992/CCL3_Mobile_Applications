@@ -156,6 +156,14 @@ class MainViewModel(
         _mainViewState.update { it.copy(showChangeStatusDialog = false) }
     }
 
+    fun openDeleteDialog() {
+        _mainViewState.update { it.copy(showDeleteDialog = true) }
+    }
+
+    fun dismissDeleteDialog() {
+        _mainViewState.update { it.copy(showDeleteDialog = false) }
+    }
+
     fun deleteBook(book: Book) {
         viewModelScope.launch {
             dao.deleteBook(book)

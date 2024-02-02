@@ -32,7 +32,6 @@ import com.cc221043.ccl3_mobileapplications.ui.view_model.OnboardingViewModel
 
 class MainActivity : ComponentActivity() {
     private val onboardingDataStore: DataStore<Preferences> by preferencesDataStore(name = "onboarding_prefs")
-
     private val onboardingViewModel by viewModels<OnboardingViewModel> {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -43,7 +42,7 @@ class MainActivity : ComponentActivity() {
 
     private val db by lazy {
     Room.databaseBuilder(this, BookDatabase::class.java, "BookDatabase.db").build()
-}
+    }
 
     private val mainViewModel by viewModels<MainViewModel> (
         factoryProducer = {
@@ -68,7 +67,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             CCL3MobileApplicationsTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

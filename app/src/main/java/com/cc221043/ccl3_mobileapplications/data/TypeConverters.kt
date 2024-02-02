@@ -2,6 +2,7 @@ package com.cc221043.ccl3_mobileapplications.data
 
 import androidx.room.TypeConverter
 
+// converts Lists of Strings to a single String and vice versa
 class TypeConverters {
     @TypeConverter
     fun fromList(list: List<String>?): String? {

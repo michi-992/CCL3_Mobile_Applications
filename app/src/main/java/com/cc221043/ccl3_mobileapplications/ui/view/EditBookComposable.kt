@@ -63,7 +63,7 @@ import com.cc221043.ccl3_mobileapplications.data.model.Book
 import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
 
-
+// Composable function for editing book; quite similar to AddBookComposable
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditBook(
@@ -115,6 +115,7 @@ fun EditBook(
             )
             .padding(top = 16.dp, start = 14.dp, end = 14.dp)
     )  {
+        // previous input for the variables
         var title by rememberSaveable { mutableStateOf(book.title) }
         var author by rememberSaveable { mutableStateOf(book.author) }
         var platformat by rememberSaveable { mutableStateOf(book.platformat) }

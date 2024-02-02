@@ -28,14 +28,17 @@ class MainViewModel(
     private val _mainViewState = MutableStateFlow(MainViewState())
     val mainViewState: StateFlow<MainViewState> = _mainViewState.asStateFlow()
 
+    // updates selected screen
     fun selectedScreen(screen: Screen) {
         _mainViewState.update { it.copy(selectedScreen = screen) }
     }
 
+    // saves previous screen
     fun previousScreen(screenName: String) {
         _mainViewState.update { it.copy(previousScreen = screenName) }
     }
 
+    // retrieves all books and updates main view state
     fun getAllBooks() {
         viewModelScope.launch {
             dao.getAllBooks().collect() {books ->
@@ -44,6 +47,7 @@ class MainViewModel(
         }
     }
 
+    // retrieves books based on the search text
     fun getBooksBySearch(searchText: String) {
         viewModelScope.launch {
             dao.getBooksBySearch(searchText).collect() {books ->
@@ -52,10 +56,12 @@ class MainViewModel(
         }
     }
 
+    // resets list of searched books
     fun resetSearch() {
         _mainViewState.update { it.copy(searchedBooks = emptyList()) }
     }
 
+    // retrieves all books and copies them to the list of books filtered by genre
     fun getAllBooksForGenres() {
         viewModelScope.launch {
             dao.getAllBooks().collect() {books ->
@@ -64,11 +70,13 @@ class MainViewModel(
         }
     }
 
+    // filters books by status
     fun changeStatusFilteredBooks(books: List<Book>, status: String) {
         val filteredBooks = books.filter { it.status == status }
         _mainViewState.update { it.copy(statusFilteredBooks = filteredBooks) }
     }
 
+    // filters books by genre
     fun updateSelectedGenres(genres: List<String>) {
         val selectedBooks = _mainViewState.value.booksForGenres.filter { book ->
             book.genres.containsAll(genres)
@@ -76,10 +84,11 @@ class MainViewModel(
         _mainViewState.update { it.copy(selectedBooksForGenres = selectedBooks) }
     }
 
-
+    // saves book
     fun saveBookAndImage(book: Book): Long {
         var insertedId: Long = -1
 
+        // checks if image is already selected
         if (_mainViewState.value.selectedImageURI != Uri.parse("")) {
             val contentResolver = mainActivity.contentResolver
             val inputStream = contentResolver.openInputStream(_mainViewState.value.selectedImageURI)
@@ -96,24 +105,26 @@ class MainViewModel(
             book.cover = imagePath
             clearSelectedImageURI()
         }
+        // clears image uri and inserts book into the database
         clearSelectedImageURI()
         runBlocking {
             insertedId = dao.insertBook(book)
             updateImageURI(Uri.parse(""))
         }
         return insertedId
-
-
     }
 
+    // updates image uri
     fun updateImageURI(imageURI: Uri) {
         _mainViewState.update { it.copy(selectedImageURI = imageURI) }
     }
 
+    // clears image uri
     fun clearSelectedImageURI() {
         _mainViewState.update { it.copy(selectedImageURI = Uri.parse("")) }
     }
 
+    // retrieves details of specific book
     fun selectBookDetails(id: Int) {
         viewModelScope.launch {
             dao.getBookById(id).take(1).collect() {book ->
@@ -122,6 +133,7 @@ class MainViewModel(
         }
     }
 
+    // updates a book after editing
     fun updateBookAndImage(editedBook: Book) {
         viewModelScope.launch {
             if (_mainViewState.value.selectedImageURI != Uri.parse("")) {
@@ -147,22 +159,28 @@ class MainViewModel(
             updateImageURI(Uri.parse(""))
         }
     }
+
+    // opens status change dialog
     fun openChangeStatusDialog() {
         _mainViewState.update { it.copy(showChangeStatusDialog = true) }
     }
 
+    // dismisses status change dialog
     fun dismissChangeStatusDialog() {
         _mainViewState.update { it.copy(showChangeStatusDialog = false) }
     }
 
+    // opens delete dialog
     fun openDeleteDialog() {
         _mainViewState.update { it.copy(showDeleteDialog = true) }
     }
 
+    // dismisses delete dialog
     fun dismissDeleteDialog() {
         _mainViewState.update { it.copy(showDeleteDialog = false) }
     }
 
+    // deletes book
     fun deleteBook(book: Book) {
         viewModelScope.launch {
             dao.deleteBook(book)

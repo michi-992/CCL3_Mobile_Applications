@@ -63,7 +63,7 @@ import com.cc221043.ccl3_mobileapplications.data.model.Book
 import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
 
-
+// Top Bar for Home Screen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTopBar() {
@@ -89,6 +89,7 @@ fun HomeTopBar() {
     )
 }
 
+// Top Bar for AddBook Screen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddBookTopBar(mainViewModel: MainViewModel, navController: NavController) {
@@ -105,6 +106,7 @@ fun AddBookTopBar(mainViewModel: MainViewModel, navController: NavController) {
 
     CenterAlignedTopAppBar(
         navigationIcon = {
+            // Back button
             IconButton(
                 onClick = {
                     if (state.value.previousScreen == Screen.AddBook.route || state.value.previousScreen == Screen.EditBook.route) {
@@ -129,6 +131,7 @@ fun AddBookTopBar(mainViewModel: MainViewModel, navController: NavController) {
     )
 }
 
+// Top Bar for EditBook Screen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditBookTopBar(mainViewModel: MainViewModel, navController: NavController) {
@@ -145,6 +148,7 @@ fun EditBookTopBar(mainViewModel: MainViewModel, navController: NavController) {
 
     CenterAlignedTopAppBar(
         navigationIcon = {
+            // Back button
             IconButton(
                 onClick = {
                     if (state.value.previousScreen == Screen.AddBook.route || state.value.previousScreen == Screen.EditBook.route) {
@@ -169,6 +173,7 @@ fun EditBookTopBar(mainViewModel: MainViewModel, navController: NavController) {
     )
 }
 
+// Top Bar for BookDetails Screen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookDetailsTopBar(mainViewModel: MainViewModel, navController: NavController) {
@@ -185,6 +190,7 @@ fun BookDetailsTopBar(mainViewModel: MainViewModel, navController: NavController
 
     CenterAlignedTopAppBar(
         navigationIcon = {
+            // Back button
             IconButton(
                 onClick = {
                     if (state.value.previousScreen == Screen.AddBook.route || state.value.previousScreen == Screen.EditBook.route) {
@@ -205,6 +211,7 @@ fun BookDetailsTopBar(mainViewModel: MainViewModel, navController: NavController
                 style = MaterialTheme.typography.titleSmall
             )
         },
+        // Dropdown menu, working in tandem with BookDetailsComposable
         actions = {
             var showDropDownMenu by remember { mutableStateOf(false) }
 
@@ -217,6 +224,7 @@ fun BookDetailsTopBar(mainViewModel: MainViewModel, navController: NavController
                 showDropDownMenu, { showDropDownMenu = false },
                 modifier = Modifier.background(Colors.Blue2),
             ) {
+                // Edit Book
                 DropdownMenuItem(
                     text = { Row (
                         verticalAlignment = Alignment.CenterVertically
@@ -230,6 +238,7 @@ fun BookDetailsTopBar(mainViewModel: MainViewModel, navController: NavController
                         navController.navigate("${Screen.EditBook.route}/${mainViewModel.mainViewState.value.selectedBook?.id}")
                     }
                 )
+                // Delete Book
                 DropdownMenuItem(
                     text = { Row (
                         verticalAlignment = Alignment.CenterVertically
@@ -242,7 +251,7 @@ fun BookDetailsTopBar(mainViewModel: MainViewModel, navController: NavController
                         mainViewModel.openDeleteDialog()
                         showDropDownMenu = false
                     })
-
+                // Quick Status Change
                 DropdownMenuItem(
                     text = { Row (
                         verticalAlignment = Alignment.CenterVertically
@@ -260,4 +269,3 @@ fun BookDetailsTopBar(mainViewModel: MainViewModel, navController: NavController
         scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
     )
 }
-

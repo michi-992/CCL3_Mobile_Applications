@@ -34,6 +34,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.cc221043.ccl3_mobileapplications.ui.view_model.OnboardingViewModel
 
 class MainActivity : ComponentActivity() {
+    // onboarding-related logic and data
     private val onboardingDataStore: DataStore<Preferences> by preferencesDataStore(name = "onboarding_prefs")
     private val onboardingViewModel by viewModels<OnboardingViewModel> {
         object : ViewModelProvider.Factory {
@@ -47,6 +48,7 @@ class MainActivity : ComponentActivity() {
     Room.databaseBuilder(this, BookDatabase::class.java, "BookDatabase.db").build()
     }
 
+    // ViewModel bor book-related data and logic
     private val mainViewModel by viewModels<MainViewModel> (
         factoryProducer = {
             object: ViewModelProvider.Factory {
@@ -57,6 +59,7 @@ class MainActivity : ComponentActivity() {
         }
     )
 
+    // handles image picking
     private val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             uri?.let {
@@ -82,13 +85,16 @@ class MainActivity : ComponentActivity() {
 
     private var doubleBackToExitPressedOnce = false
 
+    // handles 'Back' press
     override fun onBackPressed() {
+        // exits the app if 'Back' is pressed twice
         if (doubleBackToExitPressedOnce) {
             super.onBackPressed()
             finish()
             return
         }
 
+        // asks to press 'Back' again to exit the app
         this.doubleBackToExitPressedOnce = true
         Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show()
 

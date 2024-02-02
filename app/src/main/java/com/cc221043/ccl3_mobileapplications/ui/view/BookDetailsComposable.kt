@@ -58,6 +58,7 @@ import com.cc221043.ccl3_mobileapplications.data.model.Book
 import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
 
+// displays the details of a specific book
 @Composable
 fun BookDetails(mainViewModel: MainViewModel, navController: NavController, bookId: Int) {
     val state = mainViewModel.mainViewState.collectAsState()
@@ -72,7 +73,7 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
+        //displays image
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -108,12 +109,15 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        // displays title
         Text(
             text = book.title,
-            style = MaterialTheme.typography.displayMedium,
+            style = MaterialTheme.typography.titleSmall,
             color = Colors.OffWhite
         )
 
+        // only displays optional information if it was input
         if (book.author.isNotEmpty()) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
@@ -124,6 +128,7 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
         }
 
         Spacer(modifier = Modifier.size(24.dp))
+
         Row(
             modifier = Modifier.padding(bottom = 12.dp)
                 .background(color = Colors.PrimaryBlueDark, shape = CircleShape)
@@ -131,6 +136,7 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
+            // displays reading status
             if (book.status == "Finished") {
                 Icon(
                     painterResource(id = R.drawable.checkcircle),
@@ -171,12 +177,14 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
             }
         }
 
+        // displays rating (if applicable and if status is 'Finished')
         if (book.rating != 0 && book.status == "Finished") {
             RatingBar(rating = book.rating, onRatingChanged = {}, small = false)
         }
 
         Spacer(modifier = Modifier.height(18.dp))
 
+        // displays other info (genres, platform/format,synopsis)
         Column (
             modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
         ){
@@ -197,6 +205,8 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
                 style = MaterialTheme.typography.bodySmall,
                 color = Colors.Blue5
             )
+
+            // changes text/styling based on whether platform was provided
             Text(
                 text = if(book.platformat.isNotEmpty()) book.platformat else "No Platform or Format was provided",
                 style = MaterialTheme.typography.bodyMedium,
@@ -209,10 +219,11 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
                 style = MaterialTheme.typography.bodySmall,
                 color = Colors.Blue5
             )
+            // changes text/styling based on whether synopsis was provided
             Text(
                 text = if(book.synopsis.isNotEmpty()) book.synopsis else "No Synopsis was provided",
                 style = MaterialTheme.typography.bodyMedium,
-                color = if(book.platformat.isNotEmpty()) Colors.OffWhite else Colors.Blue6
+                color = if(book.synopsis.isNotEmpty()) Colors.OffWhite else Colors.Blue6
             )
 
             Spacer(modifier = Modifier.size(54.dp))
@@ -220,16 +231,18 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
         }
     }
 
+    // displays dialog for quick status change
     if (state.value.showChangeStatusDialog) {
         StatusChangeDialog(mainViewModel)
     }
 
+    // displays delete dialog
     if (state.value.showDeleteDialog) {
         DeleteDialog(mainViewModel, navController)
     }
 }
 
-
+// Composable function for delete dialog
 @Composable
 fun DeleteDialog(mainViewModel: MainViewModel, navController: NavController) {
     val state = mainViewModel.mainViewState.collectAsState()
@@ -243,6 +256,7 @@ fun DeleteDialog(mainViewModel: MainViewModel, navController: NavController) {
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
+        // asks for confirmation
         AlertDialog(
             onDismissRequest = { mainViewModel.dismissDeleteDialog() },
             title = { Text("Delete Book", style = MaterialTheme.typography.displayMedium, color = Colors.Blue5) },
@@ -253,6 +267,7 @@ fun DeleteDialog(mainViewModel: MainViewModel, navController: NavController) {
                     color = Colors.OffWhite
                 )
             },
+            // button for delete confirmation
             confirmButton = {
                 Button(colors = ButtonDefaults.buttonColors(
                     contentColor = Colors.OffWhite,
@@ -267,6 +282,7 @@ fun DeleteDialog(mainViewModel: MainViewModel, navController: NavController) {
                     Text("Delete")
                 }
             },
+            // button for cancelling
             dismissButton = {
                 Button(
                     onClick = { mainViewModel.dismissDeleteDialog() },
@@ -283,6 +299,7 @@ fun DeleteDialog(mainViewModel: MainViewModel, navController: NavController) {
     }
 }
 
+// Composable function for quick status change dialog
 @Composable
 fun StatusChangeDialog(mainViewModel: MainViewModel) {
     val state = mainViewModel.mainViewState.collectAsState()
@@ -322,6 +339,7 @@ fun StatusChangeDialog(mainViewModel: MainViewModel) {
                         style = MaterialTheme.typography.displayMedium,
                         color = Colors.Blue5
                     )
+                    // buttons for each status option
                     options.forEach {option ->
                         Button(
                             modifier = Modifier.fillMaxWidth(),
@@ -356,6 +374,8 @@ fun StatusChangeDialog(mainViewModel: MainViewModel) {
                         }
                         Spacer(Modifier.size(12.dp))
                     }
+
+                    // rating if status is 'Finished'
                     if (status == "Finished") {
                         Box(
                             modifier = Modifier
@@ -393,6 +413,7 @@ fun StatusChangeDialog(mainViewModel: MainViewModel) {
                             }
                         }
                     }
+                    // buttons for saving/cancelling
                     Row(
                         Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
@@ -431,8 +452,6 @@ fun StatusChangeDialog(mainViewModel: MainViewModel) {
                             Text("Save")
                         }
                     }
-
-
                 }
             }
         )

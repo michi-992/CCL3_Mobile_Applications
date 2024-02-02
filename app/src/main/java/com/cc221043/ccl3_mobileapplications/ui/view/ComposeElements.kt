@@ -73,6 +73,7 @@ import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
 import com.google.android.material.search.SearchBar
 
+// Composable function for the genre pills
 @Composable
 fun GenreButton(name: String, isSelected: Boolean, onNameClicked: () -> Unit) {
     Button(
@@ -91,6 +92,7 @@ fun GenreButton(name: String, isSelected: Boolean, onNameClicked: () -> Unit) {
     }
 }
 
+// Composable function for the book grid
 @Composable
 fun BookGrid(navController: NavController, books: List<Book>) {
     Column (modifier = Modifier.fillMaxSize()) {
@@ -113,6 +115,7 @@ fun BookGrid(navController: NavController, books: List<Book>) {
                                 navController.navigate("${Screen.BookDetails.route}/${books[it].id}")
                             }
                     ) {
+                        // shows cover, no other info
                         AsyncImage(
                             modifier = Modifier.clip(RoundedCornerShape(6.dp)),
                             model = books[it].cover,
@@ -133,6 +136,7 @@ fun BookGrid(navController: NavController, books: List<Book>) {
 
 }
 
+// Composable function for ratings
 @Composable
 fun RatingBar(
     rating: Int, onRatingChanged: (Int) -> Unit, modifier: Modifier = Modifier, small: Boolean
@@ -142,6 +146,7 @@ fun RatingBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        // for loop to generate rating icons, determines whether icon needs to be filled or not
         for (i in 1..5) {
             val isSelected = i <= rating
             Icon(
@@ -160,6 +165,7 @@ fun RatingBar(
     }
 }
 
+// displays circular loading indicator
 @Composable
 fun LoadingScreen() {
     Box(

@@ -62,6 +62,7 @@ import com.cc221043.ccl3_mobileapplications.data.model.Book
 import com.cc221043.ccl3_mobileapplications.ui.theme.Colors
 import com.cc221043.ccl3_mobileapplications.ui.view_model.MainViewModel
 
+// Composable function for adding a book
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickImage: () -> Unit) {
@@ -107,6 +108,7 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
             )
             .padding(top = 16.dp, start = 14.dp, end = 14.dp)
     ) {
+        // default values for all variables
         var title by rememberSaveable { mutableStateOf("") }
         var author by rememberSaveable { mutableStateOf("") }
         var platformat by rememberSaveable { mutableStateOf("") }
@@ -122,6 +124,7 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
 
         val context = LocalContext.current
 
+        // input fields for title, cover, status etc.
         TextField(
             singleLine = true,
             colors = inputFieldColors,
@@ -149,6 +152,7 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
             onValueChange = { newText -> author = newText },
             label = { Text(text = "Author (optional)", modifier = Modifier.padding(horizontal = 6.dp), fontSize = 14.sp) })
 
+        // user can upload cover here
         Row (
             modifier = Modifier.padding(bottom = 20.dp)
         ){
@@ -179,6 +183,7 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                             .shadow(4.dp, shape = CircleShape), // Apply CircleShape here
                         colors = iconButtonColors
                     ) {
+                        // if condition to change icon based on whether an image has been uploaded already
                         if (state.value.selectedImageURI == Uri.parse("")) {
                             Icon(
                                 painterResource(id = R.drawable.upload),
@@ -198,6 +203,8 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                 }
             }
             Spacer(modifier = Modifier.size(14.dp))
+
+            // status input
             Column( modifier = Modifier.fillMaxWidth()) {
                 Text(modifier = Modifier.padding(start= 14.dp), text = "Reading Status", fontSize = 14.sp, color = Colors.Blue5)
                 options.forEach {option ->
@@ -237,6 +244,7 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
             }
         }
 
+        // if condition for enabling user rating if the book has been read already
         if (status == "Finished") {
             Box(modifier = Modifier
                 .fillMaxWidth()
@@ -298,12 +306,14 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
 
         Text(modifier = Modifier.padding(start= 14.dp), text = "Genres: $genresString", fontSize = 14.sp, color = Colors.Blue5)
 
+        // genre selection; user can select multiple genres
         LazyRow (modifier = Modifier.padding(bottom = 20.dp)){
             items(genreArray) { name ->
                 GenreButton(
                     name = name,
                     isSelected = selectedGenres.contains(name),
                     onNameClicked = {
+                        // if statement to either select or deselect
                         selectedGenres = if (selectedGenres.contains(name)) {
                             selectedGenres - name
                         } else {
@@ -315,6 +325,7 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
             }
         }
 
+        // buttons for saving/cancelling
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 20.dp)) {
@@ -334,6 +345,7 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                 shape = RoundedCornerShape(12.dp),
                 colors = buttonColors,
                 onClick = {
+                    // if condition to ensure all necessary inputs are there
                     if(title.isEmpty() || status.isEmpty() || state.value.selectedImageURI == Uri.parse("") || selectedGenres.isEmpty()) {
                         Toast.makeText(context, "Input the necessary information", Toast.LENGTH_SHORT).show()
                     }
@@ -348,6 +360,7 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
                             genres = selectedGenres
                         )
 
+                        // navigation to the Details screen for the new book
                         mainViewModel.previousScreen(state.value.selectedScreen.route)
                         val insertedId = mainViewModel.saveBookAndImage(newBook)
                         navController.navigate("${Screen.BookDetails.route}/$insertedId")

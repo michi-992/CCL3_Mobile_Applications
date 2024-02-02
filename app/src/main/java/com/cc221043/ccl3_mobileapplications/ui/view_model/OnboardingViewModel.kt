@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+// ViewModel for onboarding
 class OnboardingViewModel(private val dataStore: DataStore<Preferences>) : ViewModel() {
     private val _onboardingCompleted = MutableStateFlow(false)
     val onboardingCompleted: StateFlow<Boolean> = _onboardingCompleted.asStateFlow()
@@ -20,12 +21,14 @@ class OnboardingViewModel(private val dataStore: DataStore<Preferences>) : ViewM
         initializeData()
     }
 
+    // retrieves onboarding completion value through data store
     fun initializeData() {
         viewModelScope.launch {
             _onboardingCompleted.value = dataStore.data.first()[ONBOARDING_COMPLETED_KEY] ?: false
         }
     }
 
+    // sets onboarding completion to true
     fun completeOnboarding() {
         viewModelScope.launch {
             dataStore.edit { preferences ->
@@ -35,6 +38,7 @@ class OnboardingViewModel(private val dataStore: DataStore<Preferences>) : ViewM
         }
     }
 
+    // holds the key for onboarding completion
     companion object {
         private val ONBOARDING_COMPLETED_KEY = booleanPreferencesKey("onboarding_completed")
     }

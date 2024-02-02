@@ -25,9 +25,11 @@ interface BookDao {
     @Query("SELECT * FROM books WHERE id = :id")
     fun getBookById(id: Int): Flow<Book?>
 
+    // query related to the search bar
     @Query("SELECT * FROM books WHERE LOWER(title) LIKE LOWER('%' || :searchText || '%')")
     fun getBooksBySearch(searchText: String): Flow<List<Book>>
 
+    // query for genre-filtering
     @Query("SELECT * FROM books WHERE genres IN (:genreQuery)")
     fun getBooksByGenres(genreQuery: List<String>): Flow<List<Book>>
 }

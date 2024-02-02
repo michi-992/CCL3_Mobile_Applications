@@ -10,6 +10,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -73,6 +74,7 @@ import androidx.compose.ui.unit.sp
 import com.cc221043.ccl3_mobileapplications.ui.view_model.OnboardingViewModel
 import kotlinx.coroutines.delay
 
+// set up different screens
 sealed class Screen(val route: String) {
     object Home : Screen("Home")
     object Onboarding : Screen("Onboarding")
@@ -94,6 +96,7 @@ fun MainView(
     val onboardingCompleted by onboardingViewModel.onboardingCompleted.collectAsState()
 
     Scaffold(
+        // displays top bars according to current screen
         topBar = {
             when (state.value.selectedScreen) {
                 is Screen.Home -> {
@@ -114,11 +117,14 @@ fun MainView(
             }
         }
     ) {
+        // handles navigation
         NavHost(
             navController = navController,
+            // sets Onboarding as starting point if it's not completed yet, otherwise it starts on the Home Screen
             startDestination = if (onboardingCompleted) Screen.Home.route else Screen.Onboarding.route,
             modifier = Modifier.padding(it),
         ) {
+            // composables for each screen
             composable(Screen.Onboarding.route) {
                 mainViewModel.selectedScreen(Screen.Onboarding)
                 OnboardingScreen(onboardingViewModel, navController)
@@ -137,6 +143,7 @@ fun MainView(
                     navController,
                     onPickImage = { pickImageLauncher.launch("image/*") })
             }
+            // BookDetails & EditBook require the book's ID
             composable("${Screen.BookDetails.route}/{bookId}") { backStackEntry ->
                 val bookId = backStackEntry.arguments?.getString("bookId")?.toIntOrNull() ?: -1
                 mainViewModel.selectedScreen(Screen.BookDetails)
@@ -164,7 +171,7 @@ fun MainView(
     }
 }
 
-
+// Composable function for the Home Screen
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
@@ -180,9 +187,11 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
             var tabIndex by remember { mutableIntStateOf(0) }
             val pagerState = rememberPagerState { 2 }
 
+            // scrolls to selected tab
             LaunchedEffect(tabIndex) {
                 pagerState.animateScrollToPage(tabIndex)
             }
+            // updates tab index
             LaunchedEffect(
                 pagerState.currentPage,
             ) {
@@ -200,6 +209,7 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
                     )
                 }
             ) {
+                // tabs for HomeScreenAllBooks and HomeScreenGenres
                 Tab(text = { Text("All Books", style = MaterialTheme.typography.displaySmall) },
                     selected = tabIndex == 0,
                     onClick = {
@@ -213,6 +223,7 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
                     }
                 )
             }
+            // navigates between pages
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier
@@ -225,6 +236,7 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
                 }
             }
         }
+        // Add Book button at the bottom
         Button(
             onClick = { navController.navigate("AddBook") },
             shape = RoundedCornerShape(12.dp),
@@ -247,6 +259,7 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
     }
 }
 
+// displays all books of the user
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavController) {
@@ -259,6 +272,7 @@ fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavControlle
     val initialBooks = if(searchText == "") state.value.books else state.value.searchedBooks
     val books = if(searchText == "" && statusSearch == "") state.value.books else if(searchText != "" && statusSearch == "") state.value.searchedBooks else state.value.statusFilteredBooks
 
+    // handles search function and progress filtering
     LaunchedEffect(initialBooks) {
         mainViewModel.changeStatusFilteredBooks(initialBooks, statusSearch)
     }
@@ -281,6 +295,7 @@ fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavControlle
                 ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Search bar
             TextField(
                 textStyle = MaterialTheme.typography.bodySmall,
                 singleLine = true,
@@ -336,6 +351,7 @@ fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavControlle
                     }
                 ),
             )
+            // Buttons for filtering by reading status
             Row (
                 modifier = Modifier
                     .fillMaxWidth()
@@ -359,11 +375,14 @@ fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavControlle
                             contentColor = Colors.OffWhite
                         ),
                         border = if(statusSearch == option) BorderStroke(2.dp, Color.Transparent) else BorderStroke(2.dp, Colors.PrimaryBlue),
+                        modifier = Modifier.padding(end = 6.dp),
+                        contentPadding = PaddingValues(vertical = 6.dp, horizontal = 18.dp)
                     ) {
                         Text(option)
                     }
                 }
             }
+            // displays image and message if there are no books added yet
             if (state.value.books.isEmpty()) {
                 Image(
                     painter = painterResource(id = R.drawable.barry_bored),
@@ -377,17 +396,19 @@ fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavControlle
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    style = MaterialTheme.typography.displayMedium,
+                    style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     color = Colors.Blue5
                 )
             } else {
+                // displays books in the grid
                 BookGrid(navController, books)
             }
         }
     }
 }
 
+// filters by genre
 @Composable
 fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel) {
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
@@ -409,6 +430,7 @@ fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel)
                 ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // genre selection buttons
             LazyRow (
                 modifier = Modifier.padding(top = 20.dp, start = 14.dp, end = 14.dp)
             ){
@@ -428,8 +450,10 @@ fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel)
                     )
                 }
             }
+            // writes out which genres have been selected to filter for
             Text(textAlign = TextAlign.Start, modifier = Modifier.fillMaxWidth().padding(top = 6.dp, start = 14.dp, end = 14.dp), text = "Genres: ${selectedGenres.joinToString()}", fontSize = 14.sp, color = Colors.Blue5)
 
+            // message if no books have been added yet
             if (state.value.booksForGenres.isEmpty()) {
                 Image(
                     painter = painterResource(id = R.drawable.barry_bored),
@@ -443,20 +467,23 @@ fun HomeScreenGenres(navController: NavController, mainViewModel: MainViewModel)
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    style = MaterialTheme.typography.displayMedium,
+                    style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     color = Colors.Blue5
                 )
             } else {
+                // displays books in the grid
                 BookGrid(navController, books)
             }
         }
     }
 }
 
+// Composable function for onboarding screen
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: NavController) {
+    // initializes data
     DisposableEffect(Unit) {
         onDispose {
             onboardingViewModel.initializeData()
@@ -473,7 +500,6 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
     val buttonColorsSecondary = ButtonDefaults.buttonColors(
         contentColor = Colors.OffWhite,
         containerColor = Color.Transparent,
-//        borderColor = Colors.PrimaryBlueDark,
         disabledContentColor = Colors.OffWhite,
         disabledContainerColor = Colors.Blue0,
     )
@@ -483,15 +509,18 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
         mutableIntStateOf(0)
     }
 
+    // scrolls to the next page
     LaunchedEffect(index) {
         pagerState.animateScrollToPage(index)
     }
+    // updates page index
     LaunchedEffect(
         pagerState.currentPage
     ) {
         index = pagerState.currentPage
     }
 
+    // navigates through the screens
     HorizontalPager(
         state = pagerState
     ) {
@@ -501,6 +530,7 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
                 .padding(16.dp)
         ) {
             when (index) {
+                // displays loading screen for 2 seconds
                 0 -> {
                     LoadingScreen()
                     LaunchedEffect(Unit) {
@@ -508,6 +538,7 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
                         index++
                     }
                 }
+                // pages 1, 2, 3 and 4 have an image, a title and a brief description
                 1 -> {
                     Image(
                         painter = painterResource(id = R.drawable.barry_happy),
@@ -605,12 +636,15 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
                 }
             }
 
+            // buttons for navigation
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
+                // skips the onboarding
+                // only displayed on pages 1, 2, and 3
                 if (index != 0 && index != 4) {
                     Button(onClick = {
                         onboardingViewModel.completeOnboarding()
@@ -632,6 +666,8 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
                     Modifier.padding(10.dp)
                 )
 
+                // goes back to previous page
+                // not on pages 0 and 1
                 if (index != 0 && index != 1) {
                     Button(onClick = {
                         index--
@@ -652,6 +688,8 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
                     Modifier.padding(10.dp)
                 )
 
+                // goes to next page
+                // only for pages 1, 2, and 3
                 if (index != 0 && index != 4) {
                     Button(onClick = {
                         index++
@@ -666,6 +704,8 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
                     Modifier.padding(10.dp)
                 )
 
+                // finishes the onboarding
+                // only on page 4
                 if (index == 4) {
                     Button(onClick = {
                         onboardingViewModel.completeOnboarding()

@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Arrangement.Absolute.Center
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -47,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -113,8 +116,12 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
         // displays title
         Text(
             text = book.title,
-            style = MaterialTheme.typography.titleSmall,
-            color = Colors.OffWhite
+            style = MaterialTheme.typography.titleSmall.copy(
+                textAlign = TextAlign.Center
+            ),
+            color = Colors.OffWhite,
+            modifier = Modifier
+                .padding(22.dp)
         )
 
         // only displays optional information if it was input
@@ -122,8 +129,12 @@ fun BookDetails(mainViewModel: MainViewModel, navController: NavController, book
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = book.author,
-                style = MaterialTheme.typography.bodySmall,
-                color = Colors.Blue5
+                style = MaterialTheme.typography.bodySmall.copy(
+                    textAlign = TextAlign.Center
+                ),
+                color = Colors.Blue5,
+                modifier = Modifier
+                    .padding(22.dp)
             )
         }
 

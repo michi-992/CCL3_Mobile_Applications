@@ -64,7 +64,10 @@ class MainViewModel(
         }
     }
 
-
+    fun changeStatusFilteredBooks(books: List<Book>, status: String) {
+        val filteredBooks = books.filter { it.status == status }
+        _mainViewState.update { it.copy(statusFilteredBooks = filteredBooks) }
+    }
 
     fun updateSelectedGenres(genres: List<String>) {
         val selectedBooks = _mainViewState.value.booksForGenres.filter { book ->

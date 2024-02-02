@@ -67,6 +67,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.style.TextAlign
+import com.cc221043.ccl3_mobileapplications.data.model.Book
 import com.cc221043.ccl3_mobileapplications.ui.view_model.OnboardingViewModel
 import kotlinx.coroutines.delay
 
@@ -88,7 +89,6 @@ fun MainView(
     val state = mainViewModel.mainViewState.collectAsState()
     val navController = rememberNavController()
 
-//    observeOnboardingCompletion(onboardingViewModel, navController)
     val onboardingCompleted by onboardingViewModel.onboardingCompleted.collectAsState()
     if (onboardingCompleted) {
         navController.navigate(Screen.Home.route)
@@ -170,23 +170,6 @@ fun MainView(
     }
 }
 
-@Composable
-private fun observeOnboardingCompletion(
-    onboardingViewModel: OnboardingViewModel,
-    navController: NavController
-) {
-    val onboardingCompleted by onboardingViewModel.onboardingCompleted.collectAsState()
-
-    if (onboardingCompleted) {
-        LaunchedEffect(navController) {
-            navController.navigate(Screen.Home.route)
-        }
-    } else {
-        LaunchedEffect(navController) {
-            navController.navigate(Screen.Onboarding.route)
-        }
-    }
-}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -293,9 +276,22 @@ fun HomeScreen(mainViewModel: MainViewModel, navController: NavController) {
 fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavController) {
     val gradientColors = listOf(Colors.Blue1, Colors.Blue4, Colors.Blue1)
     val state = mainViewModel.mainViewState.collectAsState()
-    var searchText by rememberSaveable { mutableStateOf("") }
 
-    val books = if(searchText == "") state.value.books else state.value.searchedBooks
+    var searchText by rememberSaveable { mutableStateOf("") }
+    var statusSearch by rememberSaveable { mutableStateOf("") }
+
+    val initialBooks = if(searchText == "") state.value.books else state.value.searchedBooks
+    val books = if(searchText == "" && statusSearch == "") state.value.books else if(searchText != "" && statusSearch == "") state.value.searchedBooks else state.value.statusFilteredBooks
+
+
+    LaunchedEffect(initialBooks) {
+        mainViewModel.changeStatusFilteredBooks(initialBooks, statusSearch)
+    }
+    LaunchedEffect(statusSearch) {
+        mainViewModel.changeStatusFilteredBooks(initialBooks, statusSearch)
+    }
+
+    val statusOptions = listOf("Not started", "In Progress", "Finished")
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -365,6 +361,26 @@ fun HomeScreenAllBooks(mainViewModel: MainViewModel, navController: NavControlle
                     }
                 ),
             )
+            Row {
+                statusOptions.forEach {option ->
+                    Button(
+                        onClick = {
+                            if(statusSearch != option) {
+                                statusSearch = option
+                            } else {
+                                statusSearch = ""
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (statusSearch == option) Colors.PrimaryBlue else Color.Transparent,
+                            contentColor = Colors.OffWhite
+                        ),
+                        border = if(statusSearch == option) BorderStroke(2.dp, Color.Transparent) else BorderStroke(2.dp, Colors.PrimaryBlue),
+                    ) {
+                        Text(option)
+                    }
+                }
+            }
             if (state.value.books.isEmpty()) {
                 Image(
                     painter = painterResource(id = R.drawable.barry_bored),

@@ -325,12 +325,12 @@ fun AddBook(mainViewModel: MainViewModel, navController: NavController, onPickIm
 
         TextField(
             colors = inputFieldColors,
-            shape = CircleShape,
+            shape = RoundedCornerShape(16.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 20.dp)
                 .shadow(shape = CircleShape, elevation = 6.dp)
-                .border(BorderStroke(2.dp, color = Colors.PrimaryBlue), shape = CircleShape),
+                .border(BorderStroke(2.dp, color = Colors.PrimaryBlue), shape = RoundedCornerShape(18.dp)),
             value = synopsis,
             onValueChange = { newText -> synopsis = newText },
             label = { Text(text = "Synopsis (optional)", modifier = Modifier.padding(horizontal = 12.dp), fontSize = 14.sp) })

@@ -70,6 +70,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
 import com.cc221043.ccl3_mobileapplications.ui.view_model.OnboardingViewModel
 import kotlinx.coroutines.delay
@@ -504,220 +505,247 @@ fun OnboardingScreen(onboardingViewModel: OnboardingViewModel, navController: Na
         disabledContainerColor = Colors.Blue0,
     )
 
-    val pagerState = rememberPagerState { 5 }
-    var index by remember {
-        mutableIntStateOf(0)
-    }
+    Column {
+        var tabIndex by remember { mutableIntStateOf(0) }
+        val pagerState = rememberPagerState { 5 }
 
-    // scrolls to the next page
-    LaunchedEffect(index) {
-        pagerState.animateScrollToPage(index)
-    }
-    // updates page index
-    LaunchedEffect(
-        pagerState.currentPage
-    ) {
-        index = pagerState.currentPage
-    }
+        // navigates to next page after delay
+        LaunchedEffect(tabIndex) {
+            if(tabIndex == 0) {
+                delay(2000)
+                tabIndex++
+            }
+            pagerState.animateScrollToPage(tabIndex)
+            println(tabIndex)
+        }
 
-    // navigates through the screens
-    HorizontalPager(
-        state = pagerState
-    ) {
-        Column(
+        // handles page change
+        LaunchedEffect(pagerState.currentPage) {
+            if(pagerState.currentPage == 0) {
+                delay(2000)
+                tabIndex++
+            }
+            tabIndex = pagerState.currentPage
+            println(tabIndex)
+        }
+
+        // navigates between onboarding pages
+        HorizontalPager(
+            state = pagerState,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
+                .fillMaxWidth()
+                .weight(1f)
+        ) { index ->
             when (index) {
-                // displays loading screen for 2 seconds
                 0 -> {
                     LoadingScreen()
-                    LaunchedEffect(Unit) {
-                        delay(2000)
-                        index++
-                    }
                 }
-                // pages 1, 2, 3 and 4 have an image, a title and a brief description
                 1 -> {
-                    Image(
-                        painter = painterResource(id = R.drawable.barry_happy),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(300.dp)
-                    )
-                    Text("Hello! I'm Barry the BiblioBat.",
-                        style = MaterialTheme.typography.titleMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
-                            .fillMaxWidth()
-                    )
-                    Text("I'll help you keep track of all your reads.",
-                        style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
-                            .fillMaxWidth()
-                    )
-
+                    FirstOnboardingScreen()
+                    LaunchedEffect(Unit) {
+                    }
                 }
                 2 -> {
-                    Image(
-                        painter = painterResource(id = R.drawable.onboarding_one),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(300.dp)
-                    )
-                    Text("Easily find your books",
-                        style = MaterialTheme.typography.titleMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
-                            .fillMaxWidth()
-                    )
-                    Text("You can search for a specific book you've added and view its details.",
-                        style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
-                            .fillMaxWidth()
-                    )
-
+                    SecondOnboardingScreen()
                 }
                 3 -> {
-                    Image(
-                        painter = painterResource(id = R.drawable.onboarding_two),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(300.dp)
-                    )
-                    Text("Keep track of your books",
-                        style = MaterialTheme.typography.titleMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
-                            .fillMaxWidth()
-                    )
-                    Text("Organize your books for an easy overview of all your reads.",
-                        style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
-                            .fillMaxWidth()
-                    )
+                    ThirdOnboardingScreen()
                 }
                 4 -> {
-                    Image(
-                        painter = painterResource(id = R.drawable.onboarding_three),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(300.dp)
-                    )
-                    Text("Track your status & rate your reads",
-                        style = MaterialTheme.typography.titleMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
-                            .fillMaxWidth()
-                    )
-                    Text("Update your reading status and rate your book to keep up with your reading journey!",
-                        style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
-                            .fillMaxWidth()
-                    )
-
+                    FourthOnboardingScreen()
                 }
             }
+        }
 
-            // buttons for navigation
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                // skips the onboarding
-                // only displayed on pages 1, 2, and 3
-                if (index != 0 && index != 4) {
+        // buttons for navigating
+        Column(
+            modifier = Modifier.fillMaxWidth().height(160.dp).padding(horizontal = 14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ){
+                // back button
+                if (tabIndex != 0 && tabIndex != 1) {
                     Button(onClick = {
-                        onboardingViewModel.completeOnboarding()
-                        navController.navigate(Screen.Home.route)
+                        tabIndex--
                     },
+                        border = BorderStroke(2.dp, Colors.PrimaryBlueDark),
                         colors = buttonColorsSecondary,
-                        modifier = Modifier
-                            .border(
-                                width = 1.dp,
-                                color = Colors.PrimaryBlueDark,
-                                shape = CircleShape
-                            )
-                    ) {
-                        Text("Skip")
-                    }
-                }
-
-                Spacer(
-                    Modifier.padding(10.dp)
-                )
-
-                // goes back to previous page
-                // not on pages 0 and 1
-                if (index != 0 && index != 1) {
-                    Button(onClick = {
-                        index--
-                    },
-                        colors = buttonColorsSecondary,
-                        modifier = Modifier
-                            .border(
-                                width = 1.dp,
-                                color = Colors.PrimaryBlueDark,
-                                shape = CircleShape
-                            )
+                        modifier = Modifier.weight(1f)
                     )  {
                         Text("Back")
                     }
                 }
-
-                Spacer(
-                    Modifier.padding(10.dp)
-                )
-
-                // goes to next page
-                // only for pages 1, 2, and 3
-                if (index != 0 && index != 4) {
-                    Button(onClick = {
-                        index++
-                    },
+                // next button
+                if (tabIndex != 0 && tabIndex != 4) {
+                    Button(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            tabIndex++
+                        },
                         colors = buttonColors
                     ) {
-                        Text("Next")
+                        Text(text = if(tabIndex == 1) "Let's go" else "Next")
                     }
                 }
-
-                Spacer(
-                    Modifier.padding(10.dp)
-                )
-
-                // finishes the onboarding
-                // only on page 4
-                if (index == 4) {
-                    Button(onClick = {
-                        onboardingViewModel.completeOnboarding()
-                        navController.navigate(Screen.Home.route)
-                    },
+                // finish button
+                if (tabIndex == 4) {
+                    Button(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            onboardingViewModel.completeOnboarding()
+                            navController.navigate(Screen.Home.route)
+                        },
                         colors = buttonColors
                     ) {
                         Text("Finish")
                     }
+                }
+
+            }
+
+            Spacer(
+                Modifier.padding(10.dp)
+            )
+
+            //skip button
+            if (tabIndex != 0 && tabIndex != 4) {
+                Button(
+                    onClick = {
+                        onboardingViewModel.completeOnboarding()
+                        navController.navigate(Screen.Home.route)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = Colors.OffWhite,
+                        containerColor = Color.Transparent,
+                        disabledContentColor = Colors.OffWhite,
+                        disabledContainerColor = Color.Transparent,
+                    )
+                ) {
+                    Text("Skip Introduction", style = MaterialTheme.typography.bodySmall, textDecoration = TextDecoration.Underline)
                 }
             }
         }
     }
 }
 
+// onboarding screens with respective contents
+@Composable
+fun FirstOnboardingScreen() {
+    Column {
+        Image(
+            painter = painterResource(id = R.drawable.barry_happy),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(260.dp)
+        )
+        Text(
+            "Hello! I'm Barry the BiblioBat.",
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
+        )
+        Text(
+            "I'll help you keep track of all your reads.",
+            style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
+        )
+    }
+
+}
+
+@Composable
+fun SecondOnboardingScreen() {
+    Column {
+        Image(
+            painter = painterResource(id = R.drawable.onboarding_one),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(260.dp)
+        )
+        Text(
+            "Easily find your books",
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
+        )
+        Text(
+            "You can search for a specific book you've added and view its details.",
+            style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
+        )
+    }
+
+}
+
+@Composable
+fun ThirdOnboardingScreen() {
+    Column {
+        Image(
+            painter = painterResource(id = R.drawable.onboarding_two),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(260.dp)
+        )
+        Text(
+            "Keep track of your books",
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
+        )
+        Text(
+            "Organize your books for an easy overview of all your reads.",
+            style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+fun FourthOnboardingScreen() {
+    Column {
+        Image(
+            painter = painterResource(id = R.drawable.onboarding_three),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(260.dp)
+        )
+        Text(
+            "Track your status & rate your reads",
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
+        )
+        Text(
+            "Update your reading status and rate your book to keep up with your reading journey!",
+            style = MaterialTheme.typography.bodyLarge.copy(color = Colors.OffWhite),
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
+        )
+    }
+}
